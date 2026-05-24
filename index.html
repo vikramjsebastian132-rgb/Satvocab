@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAT Vocab Study</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f9f7f4;
+      --surface: #ffffff;
+      --surface2: #f2efe9;
+      --border: #e0dbd2;
+      --border2: #c8c2b8;
+      --text: #1a1814;
+      --text2: #6b655c;
+      --text3: #9e9890;
+      --accent: #2d5a3d;
+      --accent-light: #e8f2eb;
+      --accent2: #8b4513;
+      --accent2-light: #fdf0e8;
+      --danger: #c0392b;
+      --danger-light: #fdecea;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    header {
+      background: var(--accent);
+      color: #fff;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .logo { font-size: 1.1rem; font-weight: bold; letter-spacing: 0.02em; }
+    .logo span { font-style: italic; opacity: 0.8; font-weight: normal; font-size: 0.85rem; margin-left: 8px; }
+    nav { display: flex; gap: 4px; }
+    nav button {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.75);
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    nav button:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    nav button.active { background: rgba(255,255,255,0.2); color: #fff; font-weight: bold; }
+
+    /* LAYOUT */
+    main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* SHARED COMPONENTS */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--shadow);
+    }
+    .card + .card { margin-top: 1rem; }
+
+    h2 { font-size: 1.4rem; margin-bottom: 1.25rem; color: var(--text); }
+    h3 { font-size: 1rem; margin-bottom: 0.75rem; color: var(--text); font-weight: bold; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 18px;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .btn:hover { background: var(--surface2); border-color: var(--text3); }
+    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-primary:hover { background: #1e3f2a; border-color: #1e3f2a; }
+    .btn-success { color: var(--accent); border-color: var(--accent); }
+    .btn-success:hover { background: var(--accent-light); }
+    .btn-danger { color: var(--danger); border-color: var(--danger); }
+    .btn-danger:hover { background: var(--danger-light); }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+
+    /* LETTER GRID */
+    .letter-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
+    .letter-btn {
+      width: 36px; height: 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: bold;
+      font-family: inherit;
+      color: var(--text2);
+      transition: all 0.15s;
+    }
+    .letter-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .letter-btn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* BROWSE */
+    .search-wrap { position: relative; margin-bottom: 1rem; }
+    .search-wrap input {
+      width: 100%; padding: 10px 14px 10px 40px;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+    }
+    .search-wrap input:focus { outline: none; border-color: var(--accent); }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 1rem; pointer-events: none; }
+
+    .word-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+    .word-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .word-card:hover { border-color: var(--border2); box-shadow: var(--shadow); }
+    .wc-word { font-size: 1.1rem; font-weight: bold; color: var(--text); }
+    .wc-pos { font-size: 0.75rem; color: var(--text3); margin: 2px 0 6px; font-style: italic; }
+    .wc-def { font-size: 0.88rem; color: var(--text2); line-height: 1.55; }
+    .wc-ex { font-size: 0.8rem; color: var(--text3); margin-top: 8px; font-style: italic; line-height: 1.5; }
+    .empty { text-align: center; color: var(--text3); padding: 3rem; font-style: italic; }
+
+    .browse-meta { font-size: 0.85rem; color: var(--text3); margin-bottom: 1rem; }
+
+    /* FLASHCARDS */
+    .fc-setup-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 1rem; }
+    .fc-count { font-size: 0.85rem; color: var(--text3); }
+
+    .fc-mode-row { display: flex; gap: 8px; margin-bottom: 1.5rem; }
+    .mode-btn {
+      padding: 7px 16px; border: 1px solid var(--border2); border-radius: var(--radius);
+      background: transparent; cursor: pointer; font-size: 0.85rem;
+      font-family: inherit; color: var(--text2); transition: all 0.15s;
+    }
+    .mode-btn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+    .fc-outer { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+
+    .fc-card-wrap { perspective: 1000px; width: 100%; max-width: 540px; height: 240px; cursor: pointer; }
+    .fc-card-inner {
+      width: 100%; height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.45s ease;
+    }
+    .fc-card-wrap.flipped .fc-card-inner { transform: rotateY(180deg); }
+    .fc-face {
+      position: absolute; inset: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 2rem; text-align: center;
+      backface-visibility: hidden;
+    }
+    .fc-back-face { transform: rotateY(180deg); }
+    .fc-word-big { font-size: 2rem; font-weight: bold; margin-bottom: 6px; }
+    .fc-pos-sm { font-size: 0.8rem; color: var(--text3); font-style: italic; }
+    .fc-def-text { font-size: 1rem; line-height: 1.6; color: var(--text); margin-bottom: 10px; }
+    .fc-ex-text { font-size: 0.82rem; color: var(--text3); font-style: italic; line-height: 1.5; }
+    .fc-hint { font-size: 0.75rem; color: var(--text3); position: absolute; bottom: 14px; }
+
+    .fc-actions { display: flex; gap: 12px; align-items: center; }
+    .fc-counter { font-size: 0.85rem; color: var(--text3); min-width: 80px; text-align: center; }
+
+    .progress-bar { width: 100%; max-width: 540px; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); transition: width 0.3s; border-radius: 2px; }
+
+    .fc-done {
+      text-align: center; padding: 2.5rem;
+      background: var(--accent-light); border: 1px solid var(--accent);
+      border-radius: var(--radius-lg); max-width: 400px; width: 100%;
+    }
+    .fc-done-score { font-size: 2.5rem; font-weight: bold; color: var(--accent); }
+    .fc-done-label { font-size: 0.9rem; color: var(--text2); margin-top: 4px; margin-bottom: 1.5rem; }
+
+    /* QUIZ */
+    .quiz-options-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .qcount-btn {
+      width: 52px; height: 36px;
+      border: 1px solid var(--border2); border-radius: var(--radius);
+      background: transparent; cursor: pointer; font-size: 0.9rem;
+      font-family: inherit; color: var(--text2); transition: all 0.15s;
+    }
+    .qcount-btn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-light); font-weight: bold; }
+
+    .quiz-progress { margin-bottom: 1.5rem; }
+    .quiz-progress-top { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text3); margin-bottom: 6px; }
+    .q-prompt { font-size: 1.3rem; font-weight: bold; margin-bottom: 4px; }
+    .q-sub { font-size: 0.85rem; color: var(--text3); margin-bottom: 1.25rem; font-style: italic; }
+    .q-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .q-opt {
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-family: inherit;
+      color: var(--text);
+      text-align: left;
+      line-height: 1.45;
+      transition: all 0.15s;
+    }
+    .q-opt:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-light); }
+    .q-opt.correct { border-color: var(--accent) !important; background: var(--accent-light) !important; color: var(--accent) !important; font-weight: bold; }
+    .q-opt.wrong { border-color: var(--danger) !important; background: var(--danger-light) !important; color: var(--danger) !important; }
+    .q-opt:disabled { cursor: default; }
+    .q-feedback { min-height: 28px; margin-top: 10px; font-size: 0.88rem; }
+    .q-next-wrap { margin-top: 12px; }
+
+    .result-box { text-align: center; padding: 2.5rem; background: var(--surface2); border-radius: var(--radius-lg); margin-bottom: 1.5rem; }
+    .result-pct { font-size: 3.5rem; font-weight: bold; color: var(--accent); }
+    .result-label { font-size: 1rem; color: var(--text2); margin-top: 4px; margin-bottom: 1rem; }
+    .result-stats { display: flex; gap: 12px; justify-content: center; }
+    .stat-pill { padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; }
+    .stat-correct { background: var(--accent-light); color: var(--accent); }
+    .stat-wrong { background: var(--danger-light); color: var(--danger); }
+
+    .missed-title { font-size: 1rem; font-weight: bold; margin-bottom: 0.75rem; color: var(--text); }
+    .missed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+    .missed-item { background: var(--danger-light); border: 1px solid #f5c6c2; border-radius: var(--radius); padding: 10px 12px; }
+    .missed-w { font-weight: bold; font-size: 0.9rem; color: var(--danger); }
+    .missed-d { font-size: 0.8rem; color: var(--text2); margin-top: 2px; }
+
+    .result-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    @media (max-width: 600px) {
+      header { padding: 0 1rem; }
+      .logo span { display: none; }
+      nav button { padding: 8px 10px; font-size: 0.8rem; }
+      main { padding: 1rem; }
+      .q-options { grid-template-columns: 1fr; }
+      .word-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SAT Vocab <span>1,000 Most Common Words</span></div>
+  <nav>
+    <button class="active" onclick="showSection('browse',this)">Browse</button>
+    <button onclick="showSection('flashcards',this)">Flashcards</button>
+    <button onclick="showSection('quiz',this)">Quiz</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ==================== BROWSE ==================== -->
+  <div id="browse" class="section active">
+    <div class="card">
+      <h2>Browse Words</h2>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search words or definitions…" oninput="filterBrowse()" />
+      </div>
+      <div class="letter-grid" id="browseLetters"></div>
+      <p class="browse-meta" id="browseMeta"></p>
+    </div>
+    <div style="margin-top:1rem;">
+      <div class="word-grid" id="wordList"></div>
+    </div>
+  </div>
+
+  <!-- ==================== FLASHCARDS ==================== -->
+  <div id="flashcards" class="section">
+
+    <div id="fcSetupView">
+      <div class="card">
+        <h2>Flashcard Settings</h2>
+        <h3>Choose letters to study</h3>
+        <div class="letter-grid" id="fcLetters"></div>
+        <div class="fc-setup-row">
+          <button class="btn btn-primary" onclick="startFC()">Start flashcards</button>
+          <button class="btn" onclick="selectAll('fc')">All</button>
+          <button class="btn" onclick="clearAll('fc')">Clear</button>
+          <span class="fc-count" id="fcCount"></span>
+        </div>
+      </div>
+      <div class="card" style="margin-top:1rem;">
+        <h3>Card mode</h3>
+        <div class="fc-mode-row">
+          <button class="mode-btn on" id="modeWord" onclick="setFCMode('word')">Word → Definition</button>
+          <button class="mode-btn" id="modeDef" onclick="setFCMode('def')">Definition → Word</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="fcGameView" style="display:none;">
+      <div class="fc-outer">
+        <div class="progress-bar">
+          <div class="progress-fill" id="fcProgress" style="width:0%"></div>
+        </div>
+        <div class="fc-card-wrap" id="fcCardWrap" onclick="flipFC()">
+          <div class="fc-card-inner">
+            <div class="fc-face fc-front-face" id="fcFront"></div>
+            <div class="fc-face fc-back-face" id="fcBack"></div>
+          </div>
+        </div>
+        <div class="fc-actions">
+          <button class="btn btn-danger" onclick="markFC(false)">✗ Still learning</button>
+          <span class="fc-counter" id="fcCounter"></span>
+          <button class="btn btn-success" onclick="markFC(true)">✓ Got it</button>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-sm" onclick="shuffleFC()">↻ Shuffle</button>
+          <button class="btn btn-sm" onclick="backToFCSetup()">⚙ Change letters</button>
+        </div>
+        <div class="fc-done" id="fcDoneBox" style="display:none;">
+          <div class="fc-done-score" id="fcDoneScore"></div>
+          <div class="fc-done-label" id="fcDoneLabel"></div>
+          <button class="btn btn-primary" onclick="restartFC()">Restart deck</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== QUIZ ==================== -->
+  <div id="quiz" class="section">
+
+    <div id="quizSetupView">
+      <div class="card">
+        <h2>Quiz Settings</h2>
+        <h3 style="margin-bottom:.5rem;">Letters to include</h3>
+        <div class="letter-grid" id="quizLetters"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem;">
+          <button class="btn btn-sm" onclick="selectAll('quiz')">All</button>
+          <button class="btn btn-sm" onclick="clearAll('quiz')">Clear</button>
+          <span class="fc-count" id="quizWordCount"></span>
+        </div>
+        <h3>Number of questions</h3>
+        <div class="quiz-options-row" style="margin-bottom:1.25rem;">
+          <button class="qcount-btn on" onclick="setQCount(10,this)">10</button>
+          <button class="qcount-btn" onclick="setQCount(20,this)">20</button>
+          <button class="qcount-btn" onclick="setQCount(50,this)">50</button>
+          <button class="qcount-btn" onclick="setQCount(100,this)">100</button>
+        </div>
+        <h3>Question type</h3>
+        <div class="fc-mode-row">
+          <button class="mode-btn on" id="qtWord" onclick="setQType('word')">Given word → pick definition</button>
+          <button class="mode-btn" id="qtDef" onclick="setQType('def')">Given definition → pick word</button>
+        </div>
+        <button class="btn btn-primary" onclick="startQuiz()">Start quiz</button>
+      </div>
+    </div>
+
+    <div id="quizGameView" style="display:none;">
+      <div class="card">
+        <div class="quiz-progress">
+          <div class="quiz-progress-top">
+            <span id="qProgressLabel"></span>
+            <span id="qScoreRunning"></span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="qBar" style="width:0%"></div></div>
+        </div>
+        <div id="qContent"></div>
+      </div>
+    </div>
+
+    <div id="quizResultView" style="display:none;">
+      <div class="result-box">
+        <div class="result-pct" id="rPct"></div>
+        <div class="result-label" id="rLabel"></div>
+        <div class="result-stats">
+          <span class="stat-pill stat-correct" id="rCorrect"></span>
+          <span class="stat-pill stat-wrong" id="rWrong"></span>
+        </div>
+      </div>
+      <div id="rMissed" style="margin-bottom:1.5rem;"></div>
+      <div class="result-actions">
+        <button class="btn btn-primary" onclick="startQuiz()">Try again</button>
+        <button class="btn" onclick="backToQuizSetup()">Change settings</button>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────
+const WORDS = [
+{"w":"abase","p":"v.","d":"to humiliate, degrade","e":"After being overthrown and abased, the deposed leader offered to bow down to his conqueror."},
+{"w":"abate","p":"v.","d":"to reduce, lessen","e":"The rain poured down for a while, then abated."},
+{"w":"abdicate","p":"v.","d":"to give up a position, usually one of leadership","e":"When he realized the revolutionaries would win, the king abdicated his throne."},
+{"w":"abduct","p":"v.","d":"to kidnap, take by force","e":"The evildoers abducted the fairy princess from her happy home."},
+{"w":"aberration","p":"n.","d":"something that differs from the norm","e":"In 1918, the Boston Red Sox won the World Series, but the success turned out to be an aberration."},
+{"w":"abet","p":"v.","d":"to aid, help, encourage","e":"The spy succeeded only because he had a friend on the inside to abet him."},
+{"w":"abhor","p":"v.","d":"to hate, detest","e":"Because he always wound up kicking himself in the head, Oswald began to abhor soccer."},
+{"w":"abide","p":"v.","d":"to put up with; to remain","e":"Though he did not agree with the decision, Chuck decided to abide by it."},
+{"w":"abject","p":"adj.","d":"wretched, pitiful","e":"After losing all her money, falling into a puddle, and breaking her ankle, Eloise was abject."},
+{"w":"abjure","p":"v.","d":"to reject, renounce","e":"To prove his honesty, the President abjured the evil policies of his wicked predecessor."},
+{"w":"abnegation","p":"n.","d":"denial of comfort to oneself","e":"The holy man slept on the floor, took only cold showers, and generally followed other practices of abnegation."},
+{"w":"abort","p":"v.","d":"to give up on a half-finished project or effort","e":"After they ran out of food, the men had to abort and go home."},
+{"w":"abridge","p":"v.","d":"to cut down, shorten","e":"The publisher thought the dictionary was too long and abridged it."},
+{"w":"abrogate","p":"v.","d":"to abolish, usually by authority","e":"The Bill of Rights assures that the government cannot abrogate our right to a free press."},
+{"w":"abscond","p":"v.","d":"to sneak away and hide","e":"In the confusion, the super-spy absconded into the night with the secret plans."},
+{"w":"absolution","p":"n.","d":"freedom from blame, guilt, sin","e":"Once all the facts were known, the jury gave Angela absolution with a verdict of not guilty."},
+{"w":"abstain","p":"v.","d":"to freely choose not to commit an action","e":"Everyone demanded that Angus put on the kilt, but he abstained."},
+{"w":"abstruse","p":"adj.","d":"hard to comprehend","e":"Everyone else in the class understood geometry easily, but John found the subject abstruse."},
+{"w":"accede","p":"v.","d":"to agree","e":"They expected him to refuse, but instead he acceded to their request."},
+{"w":"accentuate","p":"v.","d":"to stress, highlight","e":"Psychologists agree that those who are happiest accentuate the positive in life."},
+{"w":"accessible","p":"adj.","d":"obtainable, reachable","e":"After studying and getting a great score, Marlena realized her goal of an Ivy League college was accessible."},
+{"w":"acclaim","p":"n.","d":"high praise","e":"Greg's excellent poem won the acclaim of his friends."},
+{"w":"accolade","p":"n.","d":"high praise, special distinction","e":"Everyone offered accolades to Sam after he won the Nobel Prize."},
+{"w":"accommodating","p":"adj.","d":"helpful, obliging, polite","e":"Arnold, Mark, and Zebulon were all friends and were accommodating to each other."},
+{"w":"accord","p":"n.","d":"an agreement","e":"After much negotiating, England and Iceland came to a mutually beneficial accord about fishing rights."},
+{"w":"accost","p":"v.","d":"to confront verbally","e":"When the waiter spilled soup on her for the fourth time, Antoinette stood up and accosted the man."},
+{"w":"accretion","p":"n.","d":"slow growth in size or amount","e":"Stalactites are formed by the accretion of minerals from the roofs of caves."},
+{"w":"acerbic","p":"adj.","d":"biting, bitter in tone or taste","e":"Jill became extremely acerbic and began to cruelly make fun of all her friends."},
+{"w":"acquiesce","p":"v.","d":"to agree without protesting","e":"Though Mr. Correlli wanted to stay outside, when his wife told him to come in to dinner, he acquiesced."},
+{"w":"acrimony","p":"n.","d":"bitterness, discord","e":"Biff and Trevor could not keep acrimony from overwhelming their friendship after they both fell in love with Teresa."},
+{"w":"acumen","p":"n.","d":"keen insight","e":"Because of his mathematical acumen, Larry figured out in minutes what took other students hours."},
+{"w":"acute","p":"adj.","d":"sharp, severe; having keen insight","e":"Arnold could not walk because the pain in his foot was so acute."},
+{"w":"adamant","p":"adj.","d":"impervious, immovable, unyielding","e":"Though public pressure was intense, the President remained adamant about his proposal."},
+{"w":"adept","p":"adj.","d":"extremely skilled","e":"Tarzan was adept at jumping from tree to tree like a monkey."},
+{"w":"adhere","p":"v.","d":"to stick to something; to follow devoutly","e":"He adhered to the dictates of his religion without question."},
+{"w":"admonish","p":"v.","d":"to caution, criticize, reprove","e":"Joe's mother admonished him not to ruin his appetite by eating cookies before dinner."},
+{"w":"adorn","p":"v.","d":"to decorate","e":"We adorned the tree with ornaments."},
+{"w":"adroit","p":"adj.","d":"skillful, dexterous","e":"The adroit thief could pick someone's pocket without attracting notice."},
+{"w":"adulation","p":"n.","d":"extreme praise","e":"Though the book was pretty good, Marcy did not believe it deserved the adulation it received."},
+{"w":"adumbrate","p":"v.","d":"to sketch out in a vague way","e":"The coach adumbrated a game plan, but none of the players knew precisely what to do."},
+{"w":"adverse","p":"adj.","d":"antagonistic, unfavorable, dangerous","e":"Because of adverse conditions, the hikers decided to give up trying to climb the mountain."},
+{"w":"advocate","p":"v./n.","d":"to argue in favor of something; one who does so","e":"Arnold advocated turning left at the stop sign, even though everyone else thought we should turn right."},
+{"w":"aesthetic","p":"adj.","d":"artistic, related to the appreciation of beauty","e":"We hired Susan as our interior decorator because she has such a fine aesthetic sense."},
+{"w":"affable","p":"adj.","d":"friendly, amiable","e":"People like to be around George because he is so affable and good-natured."},
+{"w":"affinity","p":"n.","d":"a spontaneous feeling of closeness","e":"Jerry didn't know why, but he felt an incredible affinity for Kramer the first time they met."},
+{"w":"affluent","p":"adj.","d":"rich, wealthy","e":"Mrs. Grebelski was affluent, owning a huge house, three cars, and an island near Maine."},
+{"w":"affront","p":"n.","d":"an insult","e":"Bernardo was very touchy, and took any slight as an affront to his honor."},
+{"w":"aggrandize","p":"v.","d":"to increase or make greater","e":"Joseph always dropped the names of famous people his father knew to aggrandize his personal stature."},
+{"w":"aggregate","p":"n./v.","d":"a whole or total; to gather into a mass","e":"The three branches of the U.S. Government form an aggregate more powerful than its individual parts."},
+{"w":"aggrieved","p":"adj.","d":"distressed, wronged, injured","e":"The foreman mercilessly overworked his aggrieved employees."},
+{"w":"agile","p":"adj.","d":"quick, nimble","e":"The dogs were too slow to catch the agile rabbit."},
+{"w":"agnostic","p":"adj.","d":"believing that the existence of God cannot be proven or disproven","e":"Joey's parents are very religious, but he is agnostic."},
+{"w":"alacrity","p":"n.","d":"eagerness, speed","e":"Chuck loved to help his mother, so when she asked him to set the table he did so with alacrity."},
+{"w":"alias","p":"n.","d":"a false name or identity","e":"He snuck past the guards by using an alias and fake ID."},
+{"w":"allay","p":"v.","d":"to soothe, ease","e":"The Fed chairman gave a speech to allay investors' fears about an economic downturn."},
+{"w":"allege","p":"v.","d":"to assert, usually without proof","e":"The policeman had alleged that Marshall committed the crime, but no evidence was found."},
+{"w":"alleviate","p":"v.","d":"to relieve, make more bearable","e":"This drug will alleviate the symptoms of the terrible disease, but only for a while."},
+{"w":"allocate","p":"v.","d":"to distribute, set aside","e":"The Mayor allocated 30 percent of the funds for improving the town's schools."},
+{"w":"aloof","p":"adj.","d":"reserved, distant","e":"The scientist could sometimes seem aloof, but really he was just thinking about quantum mechanics."},
+{"w":"altercation","p":"n.","d":"a dispute, fight","e":"Jason and Lionel blamed one another for the car accident, leading to an altercation."},
+{"w":"amalgamate","p":"v.","d":"to bring together, unite","e":"Because of his great charisma, the candidate was able to amalgamate all democrats and republicans under his banner."},
+{"w":"ambiguous","p":"adj.","d":"uncertain, variably interpretable","e":"Some think Caesar married Cleopatra for her power, others for her beauty — his actual reasons are ambiguous."},
+{"w":"ambivalent","p":"adj.","d":"having opposing feelings","e":"My feelings about Calvin are ambivalent: on one hand he is a loyal friend, but on the other, a cruel thief."},
+{"w":"ameliorate","p":"v.","d":"to improve","e":"The tense situation was ameliorated when Sam proposed a solution everyone could agree upon."},
+{"w":"amenable","p":"adj.","d":"willing, compliant","e":"Our father was amenable when we asked him to drive us to the farm to go apple picking."},
+{"w":"amenity","p":"n.","d":"an item that increases comfort","e":"Bill Gates's house is stocked with so many amenities, he never has to do anything for himself."},
+{"w":"amiable","p":"adj.","d":"friendly","e":"An amiable fellow, Harry got along with just about everyone."},
+{"w":"amicable","p":"adj.","d":"friendly, without hard feelings","e":"Claudia and Jimmy got divorced amicably and without hard feelings."},
+{"w":"amorphous","p":"adj.","d":"without definite shape or type","e":"The effort was doomed from the start, because the reasons behind it were so amorphous."},
+{"w":"anachronistic","p":"adj.","d":"being out of correct chronological order","e":"In this book you say the Pyramids were built after the Titanic sank, which is anachronistic."},
+{"w":"analgesic","p":"n.","d":"something that reduces pain","e":"Put this analgesic on the wound so the poor man feels a little better."},
+{"w":"analogous","p":"adj.","d":"similar to, so that an analogy can be drawn","e":"Though unrelated genetically, the bone structure of whales and fish is quite analogous."},
+{"w":"anarchist","p":"n.","d":"one who wants to eliminate all government","e":"An anarchist, Carmine wanted to dissolve every government everywhere."},
+{"w":"anathema","p":"n.","d":"a cursed, detested person","e":"I never want to see that murderer. He is an anathema to me."},
+{"w":"anecdote","p":"n.","d":"a short, humorous account","e":"After dinner, Marlon told an anecdote about the time he got his nose stuck in a toaster."},
+{"w":"anguish","p":"n.","d":"extreme sadness, torment","e":"Angelos suffered terrible anguish when he learned that Buffy had died."},
+{"w":"animated","p":"adj.","d":"lively","e":"When he begins to talk about drama, his true passion, he becomes very animated."},
+{"w":"annul","p":"v.","d":"to make void or invalid","e":"After seeing its unforeseen catastrophic effects, Congress sought to annul the law."},
+{"w":"anomaly","p":"n.","d":"something that does not fit into the normal order","e":"'That rip in the spacetime continuum is certainly a spatial anomaly,' said Spock."},
+{"w":"anonymous","p":"adj.","d":"being unknown, unrecognized","e":"Mary received a love poem from an anonymous admirer."},
+{"w":"antagonism","p":"n.","d":"hostility","e":"Superman and Bizarro Superman shared a mutual antagonism, and often fought."},
+{"w":"antecedent","p":"n.","d":"something that came before","e":"The great tradition of Western culture had its antecedent in the culture of Ancient Greece."},
+{"w":"antediluvian","p":"adj.","d":"ancient","e":"The antediluvian man still believed Eisenhower was president and hot dogs cost a nickel."},
+{"w":"anthology","p":"n.","d":"a selected collection of writings, songs, etc.","e":"The new anthology of Bob Dylan songs contains all his greatest hits."},
+{"w":"antipathy","p":"n.","d":"a strong dislike, repugnance","e":"I know you love me, but because you are a liar and a thief, I feel nothing but antipathy for you."},
+{"w":"antiquated","p":"adj.","d":"old, out of date","e":"That antiquated car has none of the features that make modern cars so great."},
+{"w":"antiseptic","p":"adj.","d":"clean, sterile","e":"The antiseptic hospital was very bare, but its cleanliness helped to keep patients healthy."},
+{"w":"antithesis","p":"n.","d":"the absolute opposite","e":"Your values, which hold war in highest esteem, are the antithesis of my pacifist beliefs."},
+{"w":"apathetic","p":"adj.","d":"lacking concern, emotion","e":"Uninterested in politics, Bruno was apathetic about whether he lived under capitalism or communism."},
+{"w":"apocryphal","p":"adj.","d":"fictitious, false, wrong","e":"Because I am standing before you, the stories circulating about my demise were apocryphal."},
+{"w":"appalling","p":"adj.","d":"inspiring shock, horror, disgust","e":"The judge found the murderer's crimes and lack of remorse appalling."},
+{"w":"appease","p":"v.","d":"to calm, satisfy","e":"When the child cries, the mother gives him candy to appease him."},
+{"w":"apprehend","p":"v.","d":"to seize, arrest; to perceive or understand","e":"The criminal was apprehended at the scene."},
+{"w":"approbation","p":"n.","d":"praise","e":"The crowd welcomed the heroes with approbation."},
+{"w":"appropriate","p":"v.","d":"to take, make use of","e":"The government appropriated the farmer's land without justification."},
+{"w":"arable","p":"adj.","d":"suitable for growing crops","e":"The farmer purchased a plot of arable land on which he will grow corn and sprouts."},
+{"w":"arbiter","p":"n.","d":"one who can resolve a dispute, make a decision","e":"The divorce court judge will serve as the arbiter between the estranged husband and wife."},
+{"w":"arbitrary","p":"adj.","d":"based on factors that appear random","e":"The boy's decision to choose one college over another seems arbitrary."},
+{"w":"arcane","p":"adj.","d":"obscure, secret, known only by a few","e":"The professor is an expert in arcane Lithuanian literature."},
+{"w":"archaic","p":"adj.","d":"of or relating to an earlier period in time, outdated","e":"In a few select regions, an archaic Chinese dialect is still spoken."},
+{"w":"archetypal","p":"adj.","d":"the most representative or typical example of something","e":"Some believe George Washington was the archetypal politician."},
+{"w":"ardor","p":"n.","d":"extreme vigor, energy, enthusiasm","e":"The soldiers conveyed their ardor with impassioned battle cries."},
+{"w":"arid","p":"adj.","d":"excessively dry","e":"Little other than palm trees and cacti grow successfully in arid environments."},
+{"w":"arrogate","p":"v.","d":"to take without justification","e":"The king arrogated the right to order executions to himself exclusively."},
+{"w":"artifact","p":"n.","d":"a remaining piece from an extinct culture or place","e":"The scientists spent all day searching the cave for Mayan artifacts."},
+{"w":"artisan","p":"n.","d":"a craftsman","e":"The artisan uses wood to make walking sticks."},
+{"w":"ascertain","p":"v.","d":"to perceive, learn","e":"With a bit of research, the student ascertained that some plants can live weeks without water."},
+{"w":"ascetic","p":"adj.","d":"practicing restraint as a means of self-discipline","e":"The priest lives an ascetic life devoid of television, savory foods, and other pleasures."},
+{"w":"ascribe","p":"v.","d":"to assign, credit, attribute to","e":"Some ascribe the invention of fireworks and dynamite to the Chinese."},
+{"w":"aspersion","p":"n.","d":"a curse, expression of ill-will","e":"The rival politicians repeatedly cast aspersions on each other's integrity."},
+{"w":"aspire","p":"v.","d":"to long for, aim toward","e":"The young poet aspires to publish a book of verse someday."},
+{"w":"assail","p":"v.","d":"to attack","e":"At dawn, the war planes assailed the boats in the harbor."},
+{"w":"assiduous","p":"adj.","d":"hard-working, diligent","e":"The construction workers erected the skyscraper during two years of assiduous labor."},
+{"w":"assuage","p":"v.","d":"to ease, pacify","e":"The mother held the baby to assuage its fears."},
+{"w":"astute","p":"adj.","d":"very clever, crafty","e":"Much of Roger's success in politics results from his ability to provide astute answers to reporters' questions."},
+{"w":"asylum","p":"n.","d":"a place of refuge, protection","e":"For Thoreau, the forest served as an asylum from the pressures of urban life."},
+{"w":"atone","p":"v.","d":"to repent, make amends","e":"The man atoned for forgetting his wife's birthday by buying her five dozen roses."},
+{"w":"atrophy","p":"v.","d":"to wither away, decay","e":"If muscles do not receive enough blood, they will soon atrophy and die."},
+{"w":"audacious","p":"adj.","d":"excessively bold","e":"The security guard was shocked by the fan's audacious attempt to offer him a bribe."},
+{"w":"augment","p":"v.","d":"to add to, expand","e":"The eager student seeks to augment his knowledge of French vocabulary by reading French literature."},
+{"w":"auspicious","p":"adj.","d":"favorable, indicative of good things","e":"The tennis player considered the sunny forecast an auspicious sign that she would win her match."},
+{"w":"austere","p":"adj.","d":"very bare, bleak","e":"The austere furniture inside the abandoned house made the place feel haunted."},
+{"w":"avarice","p":"n.","d":"excessive greed","e":"The banker's avarice led him to amass a tremendous personal fortune."},
+{"w":"avenge","p":"v.","d":"to seek revenge","e":"The victims will strive to avenge themselves against the men who robbed them."},
+{"w":"aversion","p":"n.","d":"a particular dislike for something","e":"Because he's from Hawaii, Ben has an aversion to autumn, winter, and cold climates."},
+{"w":"balk","p":"v.","d":"to stop, block abruptly","e":"Edna's boss balked at her request for another raise."},
+{"w":"banal","p":"adj.","d":"dull, commonplace","e":"The client rejected our proposal because they found our presentation banal and unimpressive."},
+{"w":"bane","p":"n.","d":"a burden","e":"Advanced physics is the bane of many students' academic lives."},
+{"w":"bard","p":"n.","d":"a poet, often a singer as well","e":"Shakespeare is often considered the greatest bard in the history of the English language."},
+{"w":"bashful","p":"adj.","d":"shy, excessively timid","e":"Frankie's mother told him not to be bashful when he refused to attend the birthday party."},
+{"w":"beguile","p":"v.","d":"to trick, deceive","e":"The thief beguiled his partners into surrendering all of their money to him."},
+{"w":"behemoth","p":"n.","d":"something of tremendous power or size","e":"The new aircraft carrier is among several behemoths added to the Air Force fleet."},
+{"w":"benevolent","p":"adj.","d":"marked by goodness or doing good","e":"Police officers should be commended for their benevolent service to the community."},
+{"w":"benign","p":"adj.","d":"favorable, not threatening, mild","e":"We were all relieved to hear that the medical tests determined her tumor to be benign."},
+{"w":"bequeath","p":"v.","d":"to pass on, give","e":"Jon's father bequeathed his entire estate to his mother."},
+{"w":"berate","p":"v.","d":"to scold vehemently","e":"The angry boss berated his employees for failing to meet their deadline."},
+{"w":"bereft","p":"adj.","d":"devoid of, without","e":"His family was bereft of food and shelter following the tornado."},
+{"w":"beseech","p":"v.","d":"to beg, plead, implore","e":"The servant beseeched the king for food to feed his starving family."},
+{"w":"bias","p":"n.","d":"a tendency, inclination, prejudice","e":"The judge's hidden bias against smokers led him to make an unfair decision."},
+{"w":"bilk","p":"v.","d":"to cheat, defraud","e":"The lawyer discovered that the firm had bilked several clients out of thousands of dollars."},
+{"w":"blandish","p":"v.","d":"to coax by using flattery","e":"Rachel's assistant tried to blandish her into accepting the deal."},
+{"w":"blemish","p":"n.","d":"an imperfection, flaw","e":"The dealer agreed to lower the price because of the many blemishes on the wooden furniture."},
+{"w":"blight","p":"n.","d":"a plague, disease; something that destroys hope","e":"The potato blight destroyed the harvest and bankrupted many families."},
+{"w":"boisterous","p":"adj.","d":"loud and full of energy","e":"The candidate won the vote after giving several boisterous speeches on television."},
+{"w":"bombastic","p":"adj.","d":"excessively confident, pompous","e":"The singer's bombastic performance disgusted the crowd."},
+{"w":"boon","p":"n.","d":"a gift or blessing","e":"The good weather has been a boon for many businesses located near the beach."},
+{"w":"brazen","p":"adj.","d":"excessively bold, brash","e":"Critics condemned the novelist's brazen attempt to plagiarize Hemingway's story."},
+{"w":"brusque","p":"adj.","d":"short, abrupt, dismissive","e":"The captain's brusque manner offended the passengers."},
+{"w":"burnish","p":"v.","d":"to polish, shine","e":"His mother asked him to burnish the silverware before setting the table."},
+{"w":"buttress","p":"v./n.","d":"to support, hold up; something that offers support","e":"The column buttresses the roof above the statue."},
+{"w":"cacophony","p":"n.","d":"tremendous noise, disharmonious sound","e":"The elementary school orchestra created a cacophony at the recital."},
+{"w":"cadence","p":"n.","d":"a rhythm, progression of sound","e":"The pianist used the foot pedal to emphasize the cadence of the sonata."},
+{"w":"cajole","p":"v.","d":"to urge, coax","e":"Fred's buddies cajoled him into attending the bachelor party."},
+{"w":"calamity","p":"n.","d":"an event with disastrous consequences","e":"The earthquake in San Francisco was a calamity worse than any other natural disaster in history."},
+{"w":"callous","p":"adj.","d":"harsh, cold, unfeeling","e":"The murderer's callous lack of remorse shocked the jury."},
+{"w":"calumny","p":"n.","d":"an attempt to spoil someone's reputation by spreading lies","e":"The local official's calumny ended up ruining his opponent's prospect of winning the election."},
+{"w":"camaraderie","p":"n.","d":"brotherhood, jovial unity","e":"Camaraderie among employees usually leads to success in business."},
+{"w":"candor","p":"n.","d":"honesty, frankness","e":"We were surprised by the candor of the mayor's speech because he is usually rather evasive."},
+{"w":"canny","p":"adj.","d":"shrewd, careful","e":"The canny runner hung at the back of the pack, then sprinted past everyone at the end."},
+{"w":"capacious","p":"adj.","d":"very spacious","e":"The workers delighted in their new capacious office space."},
+{"w":"capitulate","p":"v.","d":"to surrender","e":"The army finally capitulated after fighting a long costly battle."},
+{"w":"capricious","p":"adj.","d":"subject to whim, fickle","e":"The young girl's capricious tendencies made it difficult for her to focus on achieving her goals."},
+{"w":"captivate","p":"v.","d":"to get the attention of, hold","e":"The fireworks captivated the young boy, who had never seen such things before."},
+{"w":"caustic","p":"adj.","d":"bitter, biting, acidic","e":"The politicians exchanged caustic insults for over an hour during the debate."},
+{"w":"censure","p":"n./v.","d":"harsh criticism; to rebuke formally","e":"The frustrated teenager could not put up with anymore of her mother's censure."},
+{"w":"cerebral","p":"adj.","d":"related to the intellect","e":"The books we read in this class are too cerebral—they don't engage my emotions at all."},
+{"w":"chaos","p":"n.","d":"absolute disorder","e":"Mr. Thornton's sudden departure plunged his classroom into chaos."},
+{"w":"chastise","p":"v.","d":"to criticize severely","e":"After being chastised by her peers for mimicking Britney Spears, Miranda dyed her hair black."},
+{"w":"chide","p":"v.","d":"to voice disapproval","e":"Lucy chided Russell for his vulgar habits and sloppy appearance."},
+{"w":"chronicle","p":"n./v.","d":"a written history; to write a history","e":"The library featured the newly updated chronicle of World War II."},
+{"w":"chronological","p":"adj.","d":"arranged in order of time","e":"Lionel carefully arranged the snapshots of his former girlfriends in chronological order."},
+{"w":"circuitous","p":"adj.","d":"roundabout","e":"The bus's circuitous route took us through numerous outlying suburbs."},
+{"w":"circumlocution","p":"n.","d":"indirect and wordy language","e":"The professor's habit of speaking in circumlocutions made it difficult to follow his lectures."},
+{"w":"circumspect","p":"adj.","d":"cautious","e":"It would have been more circumspect not to have specified a time."},
+{"w":"circumvent","p":"v.","d":"to get around","e":"The school's dress code was circumvented by the determined students."},
+{"w":"clandestine","p":"adj.","d":"secret","e":"Announcing she was going to the gym, Sophie actually went to meet Joseph for a clandestine liaison."},
+{"w":"clemency","p":"n.","d":"mercy","e":"After he forgot their anniversary, Martin could only beg Maria for clemency."},
+{"w":"cloying","p":"adj.","d":"sickeningly sweet","e":"Though Ronald was physically attractive, Maud found his constant compliments cloying."},
+{"w":"coagulate","p":"v.","d":"to thicken, clot","e":"The top layer of the pudding had coagulated into a thick skin."},
+{"w":"coalesce","p":"v.","d":"to fuse into a whole","e":"Gordon's ensemble of thrift-shop garments coalesced into a surprisingly handsome outfit."},
+{"w":"coerce","p":"v.","d":"to make somebody do something by force or threat","e":"The court decided Vanilla Ice did not have to honor the contract because he had been coerced into signing it."},
+{"w":"cogent","p":"adj.","d":"intellectually convincing","e":"Irene's arguments in favor of abstinence were so cogent that I could not resist them."},
+{"w":"cognizant","p":"adj.","d":"aware, mindful","e":"Jake avoided speaking to women in bars because he was cognizant that drinking impairs his judgment."},
+{"w":"coherent","p":"adj.","d":"logically consistent, intelligible","e":"Renee could not figure out what Monroe had seen because he was too distraught to deliver a coherent statement."},
+{"w":"colloquial","p":"adj.","d":"characteristic of informal conversation","e":"Adam's essay was marked down because it contained too many colloquial expressions."},
+{"w":"collusion","p":"n.","d":"secret agreement, conspiracy","e":"The three law students worked in collusion to steal the final exam."},
+{"w":"combustion","p":"n.","d":"the act or process of burning","e":"The unexpected combustion of the prosecution's evidence forced the judge to dismiss the case."},
+{"w":"complacency","p":"n.","d":"self-satisfied ignorance of danger","e":"Colin tried to shock his friends out of their complacency by painting a frightening picture."},
+{"w":"complicit","p":"adj.","d":"being an accomplice in a wrongful act","e":"By keeping her daughter's affair a secret, Maddie became complicit in it."},
+{"w":"compunction","p":"n.","d":"distress caused by feeling guilty","e":"He felt compunction for the shabby way he'd treated her."},
+{"w":"concede","p":"v.","d":"to accept as valid","e":"Andrew had to concede that what his mother said about Diana made sense."},
+{"w":"conciliatory","p":"adj.","d":"friendly, agreeable","e":"I took Amanda's invitation to dinner as a very conciliatory gesture."},
+{"w":"concise","p":"adj.","d":"brief and direct in expression","e":"Gordon did not like to waste time, and his instructions were nothing if not concise."},
+{"w":"concoct","p":"v.","d":"to fabricate, make up","e":"She concocted the most ridiculous story to explain her absence."},
+{"w":"condone","p":"v.","d":"to pardon, deliberately overlook","e":"He refused to condone his brother's crime."},
+{"w":"conflagration","p":"n.","d":"great fire","e":"The conflagration consumed the entire building."},
+{"w":"congenial","p":"adj.","d":"pleasantly agreeable","e":"His congenial manner made him popular wherever he went."},
+{"w":"congruity","p":"n.","d":"the quality of being in agreement","e":"Bill and Veronica achieved a perfect congruity of opinion."},
+{"w":"connive","p":"v.","d":"to plot, scheme","e":"She connived to get me to give up my vacation plans."},
+{"w":"consensus","p":"n.","d":"an agreement of opinion","e":"The jury was able to reach a consensus only after days of deliberation."},
+{"w":"consolation","p":"n.","d":"an act of comforting","e":"Darren found Alexandra's presence to be a consolation for his suffering."},
+{"w":"contentious","p":"adj.","d":"having a tendency to quarrel or dispute","e":"George's contentious personality made him unpopular with his classmates."},
+{"w":"contrite","p":"adj.","d":"penitent, eager to be forgiven","e":"Blake's contrite behavior made it impossible to stay angry at him."},
+{"w":"conundrum","p":"n.","d":"puzzle, problem","e":"Interpreting Jane's behavior was a constant conundrum."},
+{"w":"convivial","p":"adj.","d":"characterized by feasting, drinking, merriment","e":"The restaurant's convivial atmosphere put me immediately at ease."},
+{"w":"convoluted","p":"adj.","d":"intricate, complicated","e":"Grace's story was so convoluted that I couldn't follow it."},
+{"w":"copious","p":"adj.","d":"profuse, abundant","e":"Copious amounts of Snapple were imbibed in the cafeteria."},
+{"w":"cordial","p":"adj.","d":"warm, affectionate","e":"His cordial greeting melted my anger at once."},
+{"w":"corroborate","p":"v.","d":"to support with evidence","e":"Luke's seemingly outrageous claim was corroborated by witnesses."},
+{"w":"corrosive","p":"adj.","d":"having the tendency to erode or eat away","e":"The effect of the chemical was highly corrosive."},
+{"w":"cosmopolitan","p":"adj.","d":"sophisticated, worldly","e":"Lloyd's education and upbringing were cosmopolitan, so he felt right at home among the learned."},
+{"w":"covet","p":"v.","d":"to desire enviously","e":"I coveted Moses's house, wife, and car."},
+{"w":"covert","p":"adj.","d":"secretly engaged in","e":"Nerwin waged a covert campaign against his enemies while outwardly appearing friendly."},
+{"w":"credulity","p":"n.","d":"readiness to believe","e":"His credulity made him an easy target for con men."},
+{"w":"crescendo","p":"n.","d":"a steady increase in intensity or volume","e":"The crescendo of the brass instruments gave the piece a patriotic feel."},
+{"w":"culpable","p":"adj.","d":"deserving blame","e":"He was culpable of the crime, and was sentenced to community service for 75 years."},
+{"w":"cultivate","p":"v.","d":"to nurture, improve, refine","e":"At the library, she cultivated her interest in spy novels."},
+{"w":"cumulative","p":"adj.","d":"increasing, building upon itself","e":"The cumulative effect of hours spent in the sun was a deep tan."},
+{"w":"cunning","p":"adj.","d":"sly, clever at being deceitful","e":"The general devised a cunning plan to surprise the enemy."},
+{"w":"cupidity","p":"n.","d":"greed, strong desire","e":"His cupidity made him enter the abandoned gold mine despite the obvious dangers."},
+{"w":"cursory","p":"adj.","d":"brief to the point of being superficial","e":"Late for the meeting, she cast a cursory glance at the agenda."},
+{"w":"curt","p":"adj.","d":"abruptly and rudely short","e":"Her curt reply made me realize that she was upset at me."},
+{"w":"curtail","p":"v.","d":"to lessen, reduce","e":"Since losing his job, he had to curtail his spending."},
+{"w":"daunting","p":"adj.","d":"intimidating, causing one to lose courage","e":"He kept delaying the daunting act of asking for a promotion."},
+{"w":"dearth","p":"n.","d":"a lack, scarcity","e":"An eager reader, she was dismayed by the dearth of classic books at the library."},
+{"w":"debacle","p":"n.","d":"a disastrous failure, disruption","e":"The elaborately designed fireworks show turned into a debacle when the fireworks started firing randomly."},
+{"w":"debase","p":"v.","d":"to lower the quality or esteem of something","e":"The large raise he gave himself debased his motives for running the charity."},
+{"w":"debunk","p":"v.","d":"to expose the falseness of something","e":"He debunked her claim to be the world's greatest chess player by defeating her 18 consecutive times."},
+{"w":"decorous","p":"adj.","d":"socially proper, appropriate","e":"The appreciative guest displayed decorous behavior toward his host."},
+{"w":"decry","p":"v.","d":"to criticize openly","e":"The kind video rental clerk decried the policy of charging customers late fees."},
+{"w":"defamatory","p":"adj.","d":"harmful toward another's reputation","e":"The defamatory gossip spreading about the actor made the public less willing to see his new movie."},
+{"w":"defer","p":"v.","d":"to postpone; to yield to another's wisdom","e":"Ron deferred to Diane, the expert on musical instruments, when asked about buying a piano."},
+{"w":"deferential","p":"adj.","d":"showing respect for another's authority","e":"His deferential attitude toward her made her more confident in her ability to run the company."},
+{"w":"deft","p":"adj.","d":"skillful, capable","e":"Having worked in a bakery for many years, Marcus was a deft bread maker."},
+{"w":"defunct","p":"adj.","d":"no longer used or existing","e":"They planned to turn the defunct schoolhouse into a community center."},
+{"w":"deleterious","p":"adj.","d":"harmful","e":"She experienced the deleterious effects of running a marathon without stretching beforehand."},
+{"w":"delineate","p":"v.","d":"to describe, outline, shed light on","e":"She neatly delineated her reasons for canceling the project's funding."},
+{"w":"demagogue","p":"n.","d":"a leader who appeals to a people's prejudices","e":"The demagogue strengthened his hold over his people by blaming immigrants for the lack of jobs."},
+{"w":"demean","p":"v.","d":"to lower the status or stature of something","e":"She refused to demean her secretary by making him order her lunch."},
+{"w":"demure","p":"adj.","d":"quiet, modest, reserved","e":"Though everyone else at the party was dancing and going crazy, she remained demure."},
+{"w":"denigrate","p":"v.","d":"to belittle, diminish the opinion of","e":"The company decided its advertisements would no longer denigrate the competitors."},
+{"w":"denounce","p":"v.","d":"to criticize publicly","e":"The senator denounced her opponent as a greedy politician."},
+{"w":"deplore","p":"v.","d":"to feel or express sorrow, disapproval","e":"We all deplored the miserable working conditions in the factory."},
+{"w":"depravity","p":"n.","d":"wickedness","e":"Rumors of the ogre's depravity made the children afraid to enter the forest."},
+{"w":"deprecate","p":"v.","d":"to belittle, depreciate","e":"Always over-modest, he deprecated his contribution to the local charity."},
+{"w":"derelict","p":"adj.","d":"abandoned, run-down","e":"Even though it was dangerous, the children enjoyed playing in the derelict house."},
+{"w":"deride","p":"v.","d":"to laugh at mockingly, scorn","e":"The bullies derided the foreign student's accent."},
+{"w":"derivative","p":"adj.","d":"taken directly from a source, unoriginal","e":"She was bored by his music because she felt it was derivative."},
+{"w":"desecrate","p":"v.","d":"to violate the sacredness of a thing or place","e":"They feared that the golf course would desecrate the preserved wilderness."},
+{"w":"desolate","p":"adj.","d":"deserted, dreary, lifeless","e":"She found the desolate landscape quite a contrast to the hustle and bustle of the city."},
+{"w":"despondent","p":"adj.","d":"feeling depressed, discouraged, hopeless","e":"Having failed the first math test, the despondent child saw no use in studying for the next."},
+{"w":"despot","p":"n.","d":"one who has total power and rules brutally","e":"The despot issued a death sentence for anyone who disobeyed his laws."},
+{"w":"destitute","p":"adj.","d":"impoverished, utterly lacking","e":"The hurricane destroyed many homes and left many families destitute."},
+{"w":"deter","p":"v.","d":"to discourage, prevent from doing","e":"Bob's description of scary snakes couldn't deter Marcia from traveling in the rainforests."},
+{"w":"devious","p":"adj.","d":"not straightforward, deceitful","e":"Not wanting to be punished, the devious girl blamed the broken vase on the cat."},
+{"w":"diaphanous","p":"adj.","d":"light, airy, transparent","e":"Sunlight poured in through the diaphanous curtains, brightening the room."},
+{"w":"didactic","p":"adj.","d":"intended to instruct; overly moralistic","e":"She wrote a didactic document showing new employees how to handle the company's customers."},
+{"w":"diffident","p":"adj.","d":"shy, quiet, modest","e":"While eating dinner with the adults, the diffident youth did not speak for fear of seeming presumptuous."},
+{"w":"diffuse","p":"v./adj.","d":"to scatter, thin out; not concentrated","e":"He diffused the tension in the room by making a joke."},
+{"w":"dilatory","p":"adj.","d":"tending to delay, causing delay","e":"The general's dilatory strategy enabled the enemy to regroup."},
+{"w":"diligent","p":"adj.","d":"showing care in doing one's work","e":"The diligent researcher made sure to check her measurements multiple times."},
+{"w":"diminutive","p":"adj.","d":"small or miniature","e":"The bullies, tall and strong, picked on the diminutive child."},
+{"w":"dirge","p":"n.","d":"a mournful song, especially for a funeral","e":"The bagpipers played a dirge as the casket was carried to the cemetery."},
+{"w":"disaffected","p":"adj.","d":"rebellious, resentful of authority","e":"The parents sent their disaffected son to a military academy to be disciplined."},
+{"w":"discern","p":"v.","d":"to perceive, detect","e":"Though he hid his emotions, she discerned from his body language that he was angry."},
+{"w":"discordant","p":"adj.","d":"not agreeing, not in harmony with","e":"The girls' sobs were a discordant sound amid the general laughter in the restaurant."},
+{"w":"discrepancy","p":"n.","d":"difference, failure of things to correspond","e":"He was troubled by the discrepancy between what he remembered paying and what his receipt showed."},
+{"w":"discretion","p":"n.","d":"the quality of being reserved in speech or action; good judgment","e":"Not wanting her patient to get overly anxious, the doctor used discretion in deciding how much to tell him."},
+{"w":"disdain","p":"n./v.","d":"scorn, low esteem; to scorn","e":"After learning of his immoral actions, Justine held Lawrence in disdain."},
+{"w":"disparage","p":"v.","d":"to criticize or speak ill of","e":"The saleswoman disparaged the competitors' products to persuade her customers to buy what she was selling."},
+{"w":"disparate","p":"adj.","d":"sharply differing, containing sharply contrasting elements","e":"Having widely varying interests, the students had disparate responses to the novel."},
+{"w":"dissemble","p":"v.","d":"to conceal, fake","e":"Not wanting to appear heartlessly greedy, she dissembled and hid her intention to sell her father's stamp collection."},
+{"w":"disseminate","p":"v.","d":"to spread widely","e":"The politician disseminated his ideas across the town before the election."},
+{"w":"dissipate","p":"v.","d":"to disappear, cause to disappear; to waste","e":"The sun finally came out and dissipated the haze."},
+{"w":"dissonance","p":"n.","d":"lack of harmony or consistency","e":"There was a striking dissonance between her alleged beliefs and her actions."},
+{"w":"dissuade","p":"v.","d":"to persuade someone not to do something","e":"Worried that he would catch a cold, she tried to dissuade him from going out on winter nights."},
+{"w":"divisive","p":"adj.","d":"causing dissent, discord","e":"Her divisive tactics turned her two friends against each other."},
+{"w":"divulge","p":"v.","d":"to reveal something secret","e":"Pressured by the press, the government finally divulged the previously unknown information."},
+{"w":"docile","p":"adj.","d":"easily taught or trained","e":"She successfully taught the docile puppy several tricks."},
+{"w":"dogmatic","p":"adj.","d":"aggressively certain about unproved principles","e":"His dogmatic claim that men were better than women at fixing appliances angered everyone."},
+{"w":"dormant","p":"adj.","d":"sleeping, temporarily inactive","e":"Though she pretended everything was fine, her anger lay dormant throughout the dinner party."},
+{"w":"dour","p":"adj.","d":"stern, joyless","e":"The children feared their dour neighbor because he would take their toys if they were too loud."},
+{"w":"dubious","p":"adj.","d":"doubtful, of uncertain quality","e":"Suspicious he was only trying to get a raise, she found his praise dubious."},
+{"w":"duplicity","p":"n.","d":"crafty dishonesty","e":"His duplicity involved convincing employees to let him lower their salaries, then stealing the money."},
+{"w":"duress","p":"n.","d":"hardship, threat","e":"It was only under intense duress that he, who was normally against killing, fired his gun."},
+{"w":"dynamic","p":"adj.","d":"actively changing","e":"The parents found it hard to keep up with the dynamic music scene."},
+{"w":"ebullient","p":"adj.","d":"extremely lively, enthusiastic","e":"She became ebullient upon receiving an acceptance letter from her first-choice college."},
+{"w":"eclectic","p":"adj.","d":"consisting of a diverse variety of elements","e":"That bar attracts an eclectic crowd: lawyers, artists, circus clowns, and investment bankers."},
+{"w":"edict","p":"n.","d":"an order, decree","e":"The ruler issued an edict requiring all of his subjects to bow down before him."},
+{"w":"efface","p":"v.","d":"to wipe out, obliterate, rub away","e":"He effaced all evidence of her presence: he threw out pictures of her and gave away her belongings."},
+{"w":"effervescent","p":"adj.","d":"bubbly, lively","e":"My friend is so effervescent that she makes everyone smile."},
+{"w":"efficacious","p":"adj.","d":"effective","e":"My doctor promised the cold medicine was efficacious, but I'm still sniffling."},
+{"w":"effrontery","p":"n.","d":"impudence, nerve, insolence","e":"When I told my aunt that she was boring, my mother scolded me for my effrontery."},
+{"w":"egregious","p":"adj.","d":"extremely bad","e":"The student who threw food across the cafeteria was punished for his egregious behavior."},
+{"w":"elated","p":"adj.","d":"overjoyed, thrilled","e":"When she found out she had won the lottery, the writer was elated."},
+{"w":"elegy","p":"n.","d":"a speech given in honor of a dead person","e":"At the funeral, the widow gave a moving elegy describing her love for her husband."},
+{"w":"elicit","p":"v.","d":"to bring forth, draw out, evoke","e":"Although I asked several times where the exit was, I elicited no response from the stone-faced policeman."},
+{"w":"eloquent","p":"adj.","d":"expressive, articulate, moving","e":"The priest gave such an eloquent sermon that most churchgoers were crying."},
+{"w":"elucidate","p":"v.","d":"to clarify, explain","e":"I didn't understand why my friend was angry with me, so I asked Janine to elucidate her feelings."},
+{"w":"elude","p":"v.","d":"to evade, escape","e":"Despite an intense search, the robber continues to elude the police."},
+{"w":"emaciated","p":"adj.","d":"very thin, enfeebled looking","e":"My sister eats a lot of pastries and chocolate but still looks emaciated."},
+{"w":"embezzle","p":"v.","d":"to steal money by falsifying records","e":"The accountant was fired for embezzling $10,000 of the company's funds."},
+{"w":"eminent","p":"adj.","d":"distinguished, prominent, famous","e":"Mr. Phillips is such an eminent scholar that every professor on campus has come to hear him lecture."},
+{"w":"empathy","p":"n.","d":"sensitivity to another's feelings as if they were one's own","e":"I feel such empathy for my sister when she's in pain that I cry too."},
+{"w":"empirical","p":"adj.","d":"based on observation or experience","e":"The scientist gathered empirical data on the growth rate of dandelions."},
+{"w":"emulate","p":"v.","d":"to imitate","e":"I idolize Britney Spears so much that I emulate everything she does."},
+{"w":"encumber","p":"v.","d":"to weigh down, burden","e":"At the airport, my friend was encumbered by her luggage, so I offered to carry two of her bags."},
+{"w":"enervate","p":"v.","d":"to weaken, exhaust","e":"Writing these sentences enervates me so much that I will have to take a nap after I finish."},
+{"w":"engender","p":"v.","d":"to bring about, create, generate","e":"During the Olympics, the victories of U.S. athletes engender a patriotic spirit among Americans."},
+{"w":"enigmatic","p":"adj.","d":"mystifying, cryptic","e":"That man wearing the dark suit and dark glasses is so enigmatic that no one even knows his name."},
+{"w":"enmity","p":"n.","d":"ill will, hatred, hostility","e":"Mark and Andy have clearly not forgiven each other — the enmity between them is obvious to anyone."},
+{"w":"ennui","p":"n.","d":"boredom, weariness","e":"I feel such ennui that I don't look forward to anything, not even my birthday party."},
+{"w":"enthrall","p":"v.","d":"to charm, hold spellbound","e":"The sailor's stories of fighting off sharks and finding ancient treasures enthralled his young son."},
+{"w":"ephemeral","p":"adj.","d":"short-lived, fleeting","e":"She promised she'd love me forever, but her 'forever' was only ephemeral: she left after one week."},
+{"w":"epitome","p":"n.","d":"a perfect example, embodiment","e":"My mother, the epitome of good taste, always dresses more elegantly than I do."},
+{"w":"equanimity","p":"n.","d":"composure","e":"Even though he had just been fired, Mr. Simms showed great equanimity by neatly packing up his desk."},
+{"w":"equivocal","p":"adj.","d":"ambiguous, uncertain, undecided","e":"His intentions were so equivocal that I didn't know whether he was being chivalrous or sleazy."},
+{"w":"erudite","p":"adj.","d":"learned","e":"My Latin teacher is such an erudite scholar that he has translated some of the most abstruse ancient poetry."},
+{"w":"eschew","p":"v.","d":"to shun, avoid","e":"George hates the color green so much that he eschews all green food."},
+{"w":"esoteric","p":"adj.","d":"understood by only a select few","e":"Even the most advanced students cannot understand the physicist's esoteric theories."},
+{"w":"espouse","p":"v.","d":"to take up as a cause, support","e":"I love animals so much that I espouse animal rights."},
+{"w":"ethereal","p":"adj.","d":"heavenly, exceptionally delicate or refined","e":"In her flowing silk gown and lace veil, the bride looked ethereal."},
+{"w":"etymology","p":"n.","d":"the history of words, their origin and development","e":"From the study of etymology, I know that 'quixotic' derives from Don Quixote."},
+{"w":"euphoric","p":"adj.","d":"elated, uplifted","e":"I was euphoric when I found out that my sister had given birth to twins."},
+{"w":"evanescent","p":"adj.","d":"fleeting, momentary","e":"My joy at getting promoted was evanescent because I discovered I would have to work much longer hours."},
+{"w":"evince","p":"v.","d":"to show, reveal","e":"Christopher's hand-wringing and nail-biting evince how nervous he is about the upcoming English test."},
+{"w":"exacerbate","p":"v.","d":"to make more violent, intense","e":"The gruesome and scary movie I saw last night exacerbated my fears of the dark."},
+{"w":"exalt","p":"v.","d":"to glorify, praise","e":"Michael Jordan is the figure in basketball we exalt the most."},
+{"w":"exculpate","p":"v.","d":"to free from guilt or blame","e":"My discovery of the ring behind the dresser exculpated me from the charge of having stolen it."},
+{"w":"execrable","p":"adj.","d":"loathsome, detestable","e":"Her pudding is so execrable that it makes me sick."},
+{"w":"exhort","p":"v.","d":"to urge, prod, spur","e":"Henry exhorted his colleagues to join him in protesting against the university's hiring policies."},
+{"w":"exigent","p":"adj.","d":"urgent, critical","e":"The patient has an exigent need for medication, or else he will lose his sight."},
+{"w":"exonerate","p":"v.","d":"to free from guilt or blame","e":"The true thief's confession exonerated the man who had been held in custody for the crime."},
+{"w":"exorbitant","p":"adj.","d":"excessive","e":"Her exorbitant praise made me blush and squirm in my seat."},
+{"w":"expedient","p":"adj.","d":"advisable, advantageous, serving one's self-interest","e":"In his bid for reelection, the governor made an expedient move by tabling all controversial legislation."},
+{"w":"expiate","p":"v.","d":"to make amends for, atone","e":"To expiate my selfishness, I gave all my profits to charity."},
+{"w":"expunge","p":"v.","d":"to obliterate, eradicate","e":"Fearful of an IRS investigation, Paul tried to expunge all incriminating evidence from his tax files."},
+{"w":"extant","p":"adj.","d":"existing, not destroyed or lost","e":"My mother's extant love letters to my father are in the attic trunk."},
+{"w":"extol","p":"v.","d":"to praise, revere","e":"Violet extolled the virtues of a vegetarian diet to her meat-loving brother."},
+{"w":"extraneous","p":"adj.","d":"irrelevant, extra, not necessary","e":"Personal political ambitions should always remain extraneous to legislative policy."},
+{"w":"extricate","p":"v.","d":"to disentangle","e":"I extricated myself from the family tension entirely and left the house for the day."},
+{"w":"exult","p":"v.","d":"to rejoice","e":"When she found out she won the literature prize, Mary exulted by dancing and singing through the school's halls."},
+{"w":"fabricate","p":"v.","d":"to make up, invent","e":"When I arrived an hour late to class, I fabricated some excuse about my car breaking down."},
+{"w":"facade","p":"n.","d":"the wall of a building; a deceptive appearance or attitude","e":"Despite my smiling façade, I am feeling melancholy."},
+{"w":"facile","p":"adj.","d":"easy, requiring little effort; superficial, insincere","e":"This game is so facile that even a four-year-old can master it."},
+{"w":"fallacious","p":"adj.","d":"incorrect, misleading","e":"Emily offered me cigarettes on the fallacious assumption that I smoked."},
+{"w":"fastidious","p":"adj.","d":"meticulous, demanding, having high and often unattainable standards","e":"Mark is so fastidious that he is never able to finish a project because it always seems imperfect to him."},
+{"w":"fathom","p":"v.","d":"to understand, comprehend","e":"I cannot fathom why you like that crabby and mean-spirited neighbor of ours."},
+{"w":"fatuous","p":"adj.","d":"silly, foolish","e":"He considers himself a serious poet, but in truth, he only writes fatuous limericks."},
+{"w":"fecund","p":"adj.","d":"fruitful, fertile","e":"The fecund tree bore enough apples to last us through the entire season."},
+{"w":"feral","p":"adj.","d":"wild, savage","e":"That beast looks so feral that I would fear being alone with it."},
+{"w":"fervent","p":"adj.","d":"ardent, passionate","e":"The fervent protestors chained themselves to the building and shouted all night long."},
+{"w":"fetter","p":"v.","d":"to chain, restrain","e":"The dog was fettered to the parking meter."},
+{"w":"fickle","p":"adj.","d":"shifting in character, inconstant","e":"In Greek dramas, the fickle gods help Achilles one day, and then harm him the next."},
+{"w":"fidelity","p":"n.","d":"loyalty, devotion","e":"Guard dogs are known for the great fidelity they show toward their masters."},
+{"w":"flagrant","p":"adj.","d":"offensive, egregious","e":"The judge's decision was a flagrant abuse of power."},
+{"w":"florid","p":"adj.","d":"flowery, ornate","e":"The writer's florid prose belongs on a sentimental Hallmark card."},
+{"w":"flout","p":"v.","d":"to disregard or disobey openly","e":"I flouted the school's dress code by wearing a tie-dyed tank top and cut-off jeans."},
+{"w":"forage","p":"v.","d":"to graze, rummage for food","e":"When we got lost on our hiking trip, we foraged for berries and nuts to survive."},
+{"w":"forbearance","p":"n.","d":"patience, restraint, toleration","e":"The doctor showed great forbearance in calming down the angry patient who shouted insults at him."},
+{"w":"forestall","p":"v.","d":"to prevent, thwart, delay","e":"I forestalled the cold I was getting by taking plenty of vitamin C pills and wearing a scarf."},
+{"w":"forsake","p":"v.","d":"to give up, renounce","e":"My New Year's resolution is to forsake smoking and drinking."},
+{"w":"fortitude","p":"n.","d":"strength, guts","e":"Achilles' fortitude in battle is legendary."},
+{"w":"fortuitous","p":"adj.","d":"happening by chance, often lucky or fortunate","e":"After looking for Manuel at home, Harriet had a fortuitous encounter with him at the post office."},
+{"w":"foster","p":"v.","d":"to stimulate, promote, encourage","e":"To foster good health in the city, the mayor started a 'Get out and exercise!' campaign."},
+{"w":"fractious","p":"adj.","d":"troublesome or irritable","e":"The child's fractious behavior convinced everyone it was time to put him to bed."},
+{"w":"fraught","p":"adj.","d":"filled or accompanied with","e":"Her glances in his direction were fraught with meaning."},
+{"w":"frenetic","p":"adj.","d":"frenzied, hectic, frantic","e":"In the hours between night and morning, the frenetic pace of city life slows to a lull."},
+{"w":"frivolous","p":"adj.","d":"of little importance, trifling","e":"Someday, all that anxiety about whether your zit will disappear before the prom will seem totally frivolous."},
+{"w":"frugal","p":"adj.","d":"thrifty, economical","e":"Richard is so frugal that his diet consists almost exclusively of catfish and chicken liver."},
+{"w":"furtive","p":"adj.","d":"secretive, sly","e":"Jane's placement of her drugs in her sock drawer was not as furtive as she thought."},
+{"w":"garish","p":"adj.","d":"gaudy, in bad taste","e":"Mrs. Watson has poor taste and covers every object in her house with a garish gold lamé."},
+{"w":"garrulous","p":"adj.","d":"talkative, wordy","e":"Some talk show hosts are so garrulous that their guests can't get a word in edgewise."},
+{"w":"genial","p":"adj.","d":"friendly, affable","e":"Although he's been known to behave like a real jerk, my brother is an overall genial guy."},
+{"w":"gluttony","p":"n.","d":"overindulgence in food or drink","e":"Ada's fried chicken tastes so divine, I don't know how anyone can call gluttony a sin."},
+{"w":"goad","p":"v.","d":"to urge, spur, incite to action","e":"Billy will goad Jim on with insults until he throws a punch."},
+{"w":"gourmand","p":"n.","d":"someone fond of eating and drinking","e":"My parents have become real gourmands in their old age."},
+{"w":"grandiloquence","p":"n.","d":"lofty, pompous language","e":"The student thought her grandiloquence would make her sound smart, but neither the class nor the teacher bought it."},
+{"w":"grandiose","p":"adj.","d":"on a magnificent or exaggerated scale","e":"Margaret planned a grandiose party, replete with elephants, trapeze artists, and clowns."},
+{"w":"gratuitous","p":"adj.","d":"uncalled for, unwarranted","e":"Every morning the guy at the donut shop gives me a gratuitous helping of ketchup packets."},
+{"w":"gregarious","p":"adj.","d":"drawn to the company of others, sociable","e":"If you're not gregarious, I don't know why you would want to go to a singles party!"},
+{"w":"grievous","p":"adj.","d":"injurious, hurtful; serious or grave in nature","e":"Electrocuting the inmate without being sure of his guilt would be a truly grievous mistake."},
+{"w":"guile","p":"n.","d":"deceitful, cunning, sly behavior","e":"Because of his great guile, the politician was able to survive scandal after scandal."},
+{"w":"hackneyed","p":"adj.","d":"unoriginal, trite","e":"A girl can only hear 'I love you' so many times before it begins to sound hackneyed and meaningless."},
+{"w":"hallowed","p":"adj.","d":"revered, consecrated","e":"In the hallowed corridors of the cathedral, the disturbed professor felt himself to be at peace."},
+{"w":"hapless","p":"adj.","d":"unlucky","e":"My poor, hapless family never seems to pick a sunny week to go on vacation."},
+{"w":"harangue","p":"n./v.","d":"a ranting speech; to give such a speech","e":"Everyone had heard the teacher's harangue about gum chewing in class before."},
+{"w":"hardy","p":"adj.","d":"robust, capable of surviving through adverse conditions","e":"I too would have expected the plants to be dead by mid-November, but apparently they're very hardy."},
+{"w":"harrowing","p":"adj.","d":"greatly distressing, vexing","e":"The car crash was a harrowing experience."},
+{"w":"haughty","p":"adj.","d":"disdainfully proud","e":"The superstar's haughty dismissal of her costars will backfire on her someday."},
+{"w":"hedonist","p":"n.","d":"one who believes pleasure should be the primary pursuit of humans","e":"Because he's such a hedonist, I knew Murray would appreciate the 11 cases of wine I bought him."},
+{"w":"hegemony","p":"n.","d":"domination over others","e":"Britain's hegemony over its colonies was threatened once nationalist sentiment began to spread around the world."},
+{"w":"heinous","p":"adj.","d":"shockingly wicked, repugnant","e":"The killings were made all the more heinous by the fact that the murderer first tortured his victims for three days."},
+{"w":"heterogeneous","p":"adj.","d":"varied, diverse in character","e":"I always buy the swirled, or heterogeneous, type of ice cream."},
+{"w":"hiatus","p":"n.","d":"a break or gap in duration or continuity","e":"The hiatus in service should last two or three months — until the cable lines are repaired."},
+{"w":"hierarchy","p":"n.","d":"a system with ranked groups","e":"Women found it very difficult to break into the upper ranks of the department's hierarchy."},
+{"w":"hypocrisy","p":"n.","d":"pretending to believe what one does not","e":"Once the politician began passing legislation that contradicted his campaign promises, his hypocrisy became apparent."},
+{"w":"hypothetical","p":"adj.","d":"supposed or assumed true, but unproven","e":"That the drug will be a success when tested in humans is still hypothetical."},
+{"w":"iconoclast","p":"n.","d":"one who attacks common beliefs or institutions","e":"Jane seems to be an iconoclast rather than an activist with a progressive agenda."},
+{"w":"idiosyncratic","p":"adj.","d":"peculiar to one person; highly individualized","e":"Your mistakes were highly idiosyncratic, so I'm going to deny your request for a new test."},
+{"w":"ignominious","p":"adj.","d":"humiliating, disgracing","e":"It was really ignominious to be kicked out of the dorm for having an illegal gas stove."},
+{"w":"illicit","p":"adj.","d":"forbidden, not permitted","e":"The fourth-grader learned many illicit words from a pamphlet being passed around school."},
+{"w":"immerse","p":"v.","d":"to absorb, deeply involve, engross","e":"After breaking up with her boyfriend, Nancy decided to immerse herself in her work."},
+{"w":"immutable","p":"adj.","d":"not changeable","e":"The laws of physics are immutable and constant."},
+{"w":"impassive","p":"adj.","d":"stoic, not susceptible to suffering","e":"Stop being so impassive; it's healthy to cry every now and then."},
+{"w":"impeccable","p":"adj.","d":"exemplary, flawless","e":"If your grades were as impeccable as your sister's, you too would receive a car for a graduation present."},
+{"w":"imperious","p":"adj.","d":"commanding, domineering","e":"The imperious nature of your manner led me to dislike you at once."},
+{"w":"impertinent","p":"adj.","d":"rude, insolent","e":"Most of your comments are so impertinent that I don't wish to dignify them with an answer."},
+{"w":"impervious","p":"adj.","d":"impenetrable, incapable of being affected","e":"Because of their thick layer of fur, many seals are almost impervious to the cold."},
+{"w":"impetuous","p":"adj.","d":"rash; hastily done","e":"Hilda's hasty slaying of the king was an impetuous, thoughtless action."},
+{"w":"implacable","p":"adj.","d":"incapable of being appeased or mitigated","e":"Watch out: once you shun Grandma's cooking, she is totally implacable."},
+{"w":"implicit","p":"adj.","d":"understood but not outwardly obvious, implied","e":"I think such a message was implicit in her instruction to use scholarly sources."},
+{"w":"impudent","p":"adj.","d":"casually rude, insolent, impertinent","e":"The impudent young man told the princess she was hot even though she hadn't asked him."},
+{"w":"inane","p":"adj.","d":"silly and meaningless","e":"Some films are so inane that the psychology of the characters makes absolutely no sense."},
+{"w":"inarticulate","p":"adj.","d":"incapable of expressing oneself clearly through speech","e":"Though he spoke for over an hour, the lecturer was completely inarticulate."},
+{"w":"incendiary","p":"adj./n.","d":"a person who agitates; inflammatory, causing combustion","e":"Gas and lighter fluid are incendiary materials that should be kept out of hot storage areas."},
+{"w":"incessant","p":"adj.","d":"unending","e":"We wanted to go outside and play, but the incessant rain kept us indoors for two days."},
+{"w":"incisive","p":"adj.","d":"clear, sharp, direct","e":"The discussion wasn't going anywhere until her incisive comment allowed everyone to see the true issues."},
+{"w":"incontrovertible","p":"adj.","d":"indisputable","e":"Only stubborn Tina would attempt to disprove the incontrovertible laws of physics."},
+{"w":"incorrigible","p":"adj.","d":"incapable of correction, delinquent","e":"After sixty-five years of smoking, she's incorrigible."},
+{"w":"indefatigable","p":"adj.","d":"incapable of defeat, failure, decay","e":"Even after traveling 62 miles, the indefatigable runner kept on moving."},
+{"w":"indigenous","p":"adj.","d":"originating in a region","e":"Some fear that non-native plants may choke out the vegetation indigenous to the area."},
+{"w":"indigent","p":"adj.","d":"very poor, impoverished","e":"I would rather donate money to help the indigent population than to the park sculpture fund."},
+{"w":"indignation","p":"n.","d":"anger sparked by something unjust or unfair","e":"I resigned from the sorority because of my indignation at its hazing of new members."},
+{"w":"indolent","p":"adj.","d":"lazy","e":"Why should my indolent children, who can't even pick themselves up off the couch, be rewarded with a trip to the mall?"},
+{"w":"indomitable","p":"adj.","d":"not capable of being conquered","e":"My indomitable nature means I could never take orders from anyone."},
+{"w":"ineffable","p":"adj.","d":"unspeakable, incapable of being expressed through words","e":"It is said that the experience of playing with a dolphin is ineffable."},
+{"w":"inept","p":"adj.","d":"not suitable or capable, unqualified","e":"She proved how inept she was when she forgot three orders and spilled a beer in a customer's lap."},
+{"w":"inexorable","p":"adj.","d":"incapable of being persuaded or placated","e":"Although I begged for hours, Mom was inexorable and refused to let me stay out all night."},
+{"w":"infamy","p":"n.","d":"notoriety, extreme ill repute","e":"The infamy of his crime will not lessen as the decades pass."},
+{"w":"ingenious","p":"adj.","d":"clever, resourceful","e":"Her ingenious use of walnuts instead of peanuts was lauded by the other garden club members."},
+{"w":"ingenuous","p":"adj.","d":"not devious; innocent and candid","e":"His speeches seem so ingenuous it's hard to believe he's not speaking from his own heart."},
+{"w":"inhibit","p":"v.","d":"to prevent, restrain, stop","e":"When I told you I needed the car last night, I certainly never meant to inhibit you from going out."},
+{"w":"inimical","p":"adj.","d":"hostile, enemylike","e":"I don't see how I could ever work for a company that was so cold and inimical to me during my interviews."},
+{"w":"iniquity","p":"n.","d":"wickedness or sin","e":"'Your iniquity,' said the priest to the practical jokester, 'will be forgiven.'"},
+{"w":"innocuous","p":"adj.","d":"harmless, inoffensive","e":"In spite of their innocuous appearance, these mushrooms are actually quite poisonous."},
+{"w":"innuendo","p":"n.","d":"an insinuation","e":"During the debate, the politician made several innuendos about the sexual activities of his opponent."},
+{"w":"insatiable","p":"adj.","d":"incapable of being satisfied","e":"My insatiable appetite for melons can be a real problem in the winter."},
+{"w":"insidious","p":"adj.","d":"appealing but imperceptibly harmful, seductive","e":"Lisa's insidious chocolate cake tastes so good but makes you feel so sick later on!"},
+{"w":"insinuate","p":"v.","d":"to suggest indirectly or subtly","e":"I wish they would stop insinuating that my perfect report card is the result of anything other than hard work."},
+{"w":"insipid","p":"adj.","d":"dull, boring","e":"The play was so insipid, I fell asleep halfway through."},
+{"w":"insolent","p":"adj.","d":"rude, arrogant, overbearing","e":"That celebrity is so insolent, making fun of his fans right to their faces."},
+{"w":"instigate","p":"v.","d":"to urge, goad","e":"The demagogue instigated the crowd into a fury by telling them that they had been cheated by the federal government."},
+{"w":"insular","p":"adj.","d":"separated and narrow-minded; tight-knit, closed off","e":"Because of the sensitive nature of their jobs, those who work for the CIA must remain insular."},
+{"w":"insurgent","p":"n.","d":"one who rebels","e":"The insurgent snuck into and defaced a different classroom each night until the administration agreed to meet his demands."},
+{"w":"integral","p":"adj.","d":"necessary for completeness","e":"Without the integral ingredient of flour, you wouldn't be able to make bread."},
+{"w":"intractable","p":"adj.","d":"difficult to manipulate, unmanageable","e":"There was no end in sight to the intractable conflict between the warring countries."},
+{"w":"intransigent","p":"adj.","d":"refusing to compromise, often on an extreme opinion","e":"The intransigent child said he would have 12 scoops of ice cream or he would bang his head against the wall."},
+{"w":"intrepid","p":"adj.","d":"brave in the face of danger","e":"After scaling a live volcano prior to its eruption, the explorer was praised for his intrepid attitude."},
+{"w":"inundate","p":"v.","d":"to flood with abundance","e":"Because I am the star of a new sitcom, my fans are sure to inundate me with fan mail and praise."},
+{"w":"inure","p":"v.","d":"to cause someone to become accustomed to a situation","e":"Twenty years in the salt mines inured the man to the discomforts of dirt and grime."},
+{"w":"invective","p":"n.","d":"an angry verbal attack","e":"My mother's irrational invective against the way I dress only made me decide to dye my hair green."},
+{"w":"inveterate","p":"adj.","d":"stubbornly established by habit","e":"I'm the first to admit that I'm an inveterate coffee drinker — I drink four cups a day."},
+{"w":"irascible","p":"adj.","d":"easily angered","e":"At the smallest provocation, my irascible cat will begin scratching and clawing."},
+{"w":"irreverence","p":"n.","d":"disrespect","e":"The irreverence displayed by the band that marched through the chapel disturbed many churchgoers."},
+{"w":"irrevocable","p":"adj.","d":"incapable of being taken back","e":"The Bill of Rights is an irrevocable part of American law."},
+{"w":"jubilant","p":"adj.","d":"extremely joyful, happy","e":"The crowd was jubilant when the firefighter carried the woman from the flaming building."},
+{"w":"judicious","p":"adj.","d":"having or exercising sound judgment","e":"When the judicious king decided to compromise rather than send his army to certain death, he was applauded."},
+{"w":"juxtaposition","p":"n.","d":"the act of placing two things next to each other for implicit comparison","e":"The interior designer admired my juxtaposition of the yellow couch and green table."},
+{"w":"knell","p":"n.","d":"the solemn sound of a bell, often indicating a death","e":"Echoing throughout our village, the funeral knell made the stormy day even more grim."},
+{"w":"kudos","p":"n.","d":"praise for an achievement","e":"After the performance, the reviewers gave the opera singer kudos for a job well done."},
+{"w":"laceration","p":"n.","d":"a cut, tear","e":"Because he fell off his bike into a rosebush, the paperboy's skin was covered with lacerations."},
+{"w":"laconic","p":"adj.","d":"terse in speech or writing","e":"The author's laconic style has won him many followers who dislike wordiness."},
+{"w":"languid","p":"adj.","d":"sluggish from fatigue or weakness","e":"In the summer months, the great heat makes people languid and lazy."},
+{"w":"larceny","p":"n.","d":"obtaining another's property by theft or trickery","e":"When my car was not where I had left it, I realized that I was a victim of larceny."},
+{"w":"largess","p":"n.","d":"the generous giving of lavish gifts","e":"My boss demonstrated great largess by giving me a new car."},
+{"w":"latent","p":"adj.","d":"hidden, but capable of being exposed","e":"Sigmund's dream represented his latent paranoid obsession with other people's shoes."},
+{"w":"laudatory","p":"adj.","d":"expressing admiration or praise","e":"Such laudatory comments are unusual from someone who is usually so reserved in his opinions."},
+{"w":"lavish","p":"adj./v.","d":"given without limits; to give without limits","e":"Because they had worked very hard, the performers appreciated the critic's lavish praise."},
+{"w":"lenient","p":"adj.","d":"demonstrating tolerance or gentleness","e":"Because Professor Oglethorpe allowed his students to choose their final grades, the other teachers believed he was excessively lenient."},
+{"w":"lethargic","p":"adj.","d":"in a state of sluggishness or apathy","e":"When Jean Claude explained to his boss that he was lethargic and didn't feel like working, the boss fired him."},
+{"w":"licentious","p":"adj.","d":"displaying a lack of moral or legal restraints","e":"Marilee has always been fascinated by the licentious private lives of politicians."},
+{"w":"limpid","p":"adj.","d":"clear, transparent","e":"Mr. Johnson's limpid writing style greatly pleased readers who disliked complicated novels."},
+{"w":"lithe","p":"adj.","d":"graceful, flexible, supple","e":"Although the dancers were all outstanding, Jae Sun's control of her lithe body was particularly impressive."},
+{"w":"lucid","p":"adj.","d":"clear, easily understandable","e":"Because Guenevere's essay was so lucid, I only had to read it once to understand her reasoning."},
+{"w":"luminous","p":"adj.","d":"brightly shining","e":"The light of the luminous moon graced the shoulders of the beautiful maiden."},
+{"w":"lurid","p":"adj.","d":"ghastly, sensational","e":"Gideon's story was judged too lurid to be printed in the school's literary magazine."},
+{"w":"maelstrom","p":"n.","d":"a destructive whirlpool which rapidly sucks in objects","e":"Little did the explorers know that a vicious maelstrom would catch their boat around the next bend."},
+{"w":"magnanimous","p":"adj.","d":"noble, generous","e":"Although I had already broken most of her dishes, Jacqueline was magnanimous enough to continue letting me use them."},
+{"w":"malevolent","p":"adj.","d":"wanting harm to befall others","e":"The malevolent old man sat in the park all day, tripping unsuspecting passersby with his cane."},
+{"w":"malleable","p":"adj.","d":"capable of being shaped or transformed","e":"Maximillian's political opinions were so malleable that anyone he talked to was able to change his mind instantly."},
+{"w":"manifest","p":"adj./v.","d":"easily understandable, obvious; to show plainly","e":"When I wrote the wrong sum on the chalkboard, my mistake was so manifest that the entire class burst into laughter."},
+{"w":"maudlin","p":"adj.","d":"weakly sentimental","e":"Although many people enjoy romantic comedies, I usually find them maudlin and shallow."},
+{"w":"maverick","p":"n.","d":"an independent, nonconformist person","e":"Andreas is a real maverick and always does things his own way."},
+{"w":"mawkish","p":"adj.","d":"characterized by sick sentimentality","e":"Although some nineteenth-century critics viewed Dickens's writing as mawkish, contemporary readers have found great depth in his works."},
+{"w":"maxim","p":"n.","d":"a common saying expressing a principle of conduct","e":"Miss Manners's etiquette maxims are both entertaining and instructional."},
+{"w":"meager","p":"adj.","d":"deficient in size or quality","e":"My meager portion of food did nothing to satisfy my appetite."},
+{"w":"mendacious","p":"adj.","d":"having a lying, false character","e":"The mendacious content of the tabloid magazines is at least entertaining."},
+{"w":"mercurial","p":"adj.","d":"characterized by rapid change or temperamentality","e":"Though widely respected for his mathematical proofs, the mercurial genius was impossible to live with."},
+{"w":"meritorious","p":"adj.","d":"worthy of esteem or reward","e":"Manfred was given the congressional medal of honor for his meritorious actions."},
+{"w":"metamorphosis","p":"n.","d":"the change of form, shape, substance","e":"Winnifred went to the gym every day for a year and underwent a metamorphosis from a waiflike girl to an athletic woman."},
+{"w":"meticulous","p":"adj.","d":"extremely careful with details","e":"The ornate needlework in the bride's gown was a product of meticulous handiwork."},
+{"w":"mitigate","p":"v.","d":"to make less violent, alleviate","e":"When I had an awful sore throat, only warm tea would mitigate the pain."},
+{"w":"modicum","p":"n.","d":"a small amount of something","e":"Refusing to display even a modicum of sensitivity, Henrietta announced her boss's affair in front of the entire office."},
+{"w":"mollify","p":"v.","d":"to soften in temper","e":"The police officer mollified the angry woman by giving her a warning instead of a ticket."},
+{"w":"morass","p":"n.","d":"a wet swampy bog; figuratively, something that traps and confuses","e":"When Theresa lost her job, she could not get out of her financial morass."},
+{"w":"morose","p":"adj.","d":"gloomy or sullen","e":"Jason's morose nature made him very unpleasant to talk to."},
+{"w":"multifarious","p":"adj.","d":"having great diversity or variety","e":"This Swiss Army knife has multifarious functions and capabilities."},
+{"w":"mundane","p":"adj.","d":"concerned with the world rather than with heaven, commonplace","e":"He is more concerned with the mundane issues of day-to-day life than with spiritual topics."},
+{"w":"munificence","p":"n.","d":"generosity in giving","e":"The royal family's munificence made everyone else in their country rich."},
+{"w":"mutable","p":"adj.","d":"able to change","e":"Because fashion is so mutable, what is trendy today will look outdated in five years."},
+{"w":"myriad","p":"adj.","d":"consisting of a very great number","e":"The city presented us with myriad possibilities for fun on Friday night."},
+{"w":"nadir","p":"n.","d":"the lowest point of something","e":"My day was boring, but the nadir came when I accidentally spilled a bowl of spaghetti on my head."},
+{"w":"nascent","p":"adj.","d":"in the process of being born or coming into existence","e":"Unfortunately, my brilliant paper was only in its nascent form on the morning that it was due."},
+{"w":"nebulous","p":"adj.","d":"vaguely defined, cloudy","e":"The transition between governments meant that who was actually in charge was a nebulous matter."},
+{"w":"nefarious","p":"adj.","d":"heinously villainous","e":"Although Dr. Meanman's nefarious plot to melt the polar icecaps was terrifying, it was so impractical that nobody really worried about it."},
+{"w":"negligent","p":"adj.","d":"habitually careless, neglectful","e":"Jessie's grandfather called me a negligent fool after I left the door to his apartment unlocked."},
+{"w":"neophyte","p":"n.","d":"someone who is young or inexperienced","e":"As a neophyte in the literary world, Malik had trouble finding a publisher for his first novel."},
+{"w":"nocturnal","p":"adj.","d":"relating to or occurring during the night","e":"Jackie was a nocturnal person; she would study until dawn and sleep until the evening."},
+{"w":"noisome","p":"adj.","d":"unpleasant, offensive, especially to the sense of smell","e":"Nobody would enter the stalls until the horse's noisome leavings were taken away."},
+{"w":"nomadic","p":"adj.","d":"wandering from place to place","e":"In the first six months after college, Jose led a nomadic life, living in New York, California, and Idaho."},
+{"w":"nominal","p":"adj.","d":"trifling, insignificant","e":"Because he was moving and needed to get rid of his furniture, Jordan sold everything for a nominal fee."},
+{"w":"nonchalant","p":"adj.","d":"having a lack of concern, indifference","e":"Although deep down she was very angry, Marsha acted in a nonchalant manner."},
+{"w":"notorious","p":"adj.","d":"widely and unfavorably known","e":"Jacob was notorious for always arriving late at parties."},
+{"w":"novice","p":"n.","d":"a beginner, someone without training or experience","e":"Because we were all novices at yoga, our instructor decided to begin with the basics."},
+{"w":"noxious","p":"adj.","d":"harmful, unwholesome","e":"Environmentalists showed that the noxious weeds were destroying the insects' natural habitats."},
+{"w":"nuance","p":"n.","d":"a slight variation in meaning, tone, expression","e":"The nuances of the poem were not obvious to the casual reader, but the professor was able to point them out."},
+{"w":"obdurate","p":"adj.","d":"unyielding to persuasion or moral influences","e":"The obdurate old man refused to take pity on the kittens."},
+{"w":"obfuscate","p":"v.","d":"to render incomprehensible","e":"The detective didn't want to answer the newspaperman's questions, so he obfuscated the truth."},
+{"w":"oblique","p":"adj.","d":"diverging from a straight line or course, not straightforward","e":"Martin's oblique language confused those who listened to him."},
+{"w":"oblivious","p":"adj.","d":"lacking consciousness or awareness of something","e":"Oblivious to the burning smell from the kitchen, my father did not notice the rolls in the oven were burned."},
+{"w":"obscure","p":"adj.","d":"unclear, partially hidden","e":"Because he was standing in the shadows, his features were obscure."},
+{"w":"obsequious","p":"adj.","d":"excessively compliant or submissive","e":"Mark acted like Janet's servant, obeying her every request in an obsequious manner."},
+{"w":"obstinate","p":"adj.","d":"not yielding easily, stubborn","e":"The obstinate child refused to leave the store until his mother bought him a candy bar."},
+{"w":"obstreperous","p":"adj.","d":"noisy, unruly","e":"Billy's obstreperous behavior prompted the librarian to ask him to leave the reading room."},
+{"w":"obtuse","p":"adj.","d":"lacking quickness of sensibility or intellect","e":"Political opponents warned that the prime minister's obtuse approach to foreign policy would embroil the nation in war."},
+{"w":"odious","p":"adj.","d":"instilling hatred or intense displeasure","e":"Mark was assigned the odious task of cleaning the cat's litter box."},
+{"w":"ominous","p":"adj.","d":"foreboding or foreshadowing evil","e":"The fortuneteller's ominous words flashed through my mind as the hooded figure approached me in the alley."},
+{"w":"onerous","p":"adj.","d":"burdensome","e":"My parents lamented that the pleasures of a beautiful country estate no longer outweighed the onerous mortgage payments."},
+{"w":"opulent","p":"adj.","d":"characterized by rich abundance verging on ostentation","e":"The opulent furnishings of the dictator's compound contrasted harshly with the meager accommodations of her subjects."},
+{"w":"ornate","p":"adj.","d":"highly elaborate, excessively decorated","e":"The ornate styling of the new model of luxury car could not compensate for the poor quality of its motor."},
+{"w":"orthodox","p":"adj.","d":"conventional, conforming to established protocol","e":"The company's profits dwindled because the management pursued orthodox business policies."},
+{"w":"oscillate","p":"v.","d":"to sway from one side to the other","e":"My uncle oscillated between buying a station wagon and buying a sports car."},
+{"w":"ostensible","p":"adj.","d":"appearing as such, seemingly","e":"Jack's ostensible reason for driving was that airfare was too expensive, but in reality, he was afraid of flying."},
+{"w":"ostentatious","p":"adj.","d":"excessively showy, glitzy","e":"On the palace tour, the guide focused on the ostentatious decorations and spoke little of the royal family's history."},
+{"w":"pacific","p":"adj.","d":"soothing","e":"The chemistry professor's pacific demeanor helped the class remain calm after the experiment exploded."},
+{"w":"palatable","p":"adj.","d":"agreeable to the taste or sensibilities","e":"Despite the unpleasant smell, the exotic cheese was quite palatable."},
+{"w":"palliate","p":"v.","d":"to reduce the severity of","e":"The doctor trusted that the new medication would palliate her patient's discomfort."},
+{"w":"pallid","p":"adj.","d":"lacking color","e":"Dr. Van Helsing feared that Lucy's pallid complexion was due to an unexplained loss of blood."},
+{"w":"panacea","p":"n.","d":"a remedy for all ills or difficulties","e":"Doctors wish there was a single panacea for every disease, but sadly there is not."},
+{"w":"paradigm","p":"n.","d":"an example that is a perfect pattern or model","e":"Because the new SUV was so popular, it became the paradigm upon which all others were modeled."},
+{"w":"paradox","p":"n.","d":"an apparently contradictory statement that is perhaps true","e":"The diplomat refused to acknowledge the paradox that negotiating a peace treaty would demand more resources than waging war."},
+{"w":"paragon","p":"n.","d":"a model of excellence or perfection","e":"The mythical Helen of Troy was considered a paragon of female beauty."},
+{"w":"paramount","p":"adj.","d":"greatest in importance, rank, character","e":"It was paramount that the bomb squad disconnect the blue wire before removing the fuse."},
+{"w":"pariah","p":"n.","d":"an outcast","e":"Following the discovery of his plagiarism, Professor Hurley was made a pariah in all academic circles."},
+{"w":"parsimony","p":"n.","d":"frugality, stinginess","e":"Many relatives believed that my aunt's wealth resulted from her parsimony."},
+{"w":"patent","p":"adj.","d":"readily seen or understood, clear","e":"The reason for Jim's abdominal pain was made patent after the doctor performed a sonogram."},
+{"w":"pathos","p":"n.","d":"an emotion of sympathy","e":"Martha filled with pathos upon discovering the scrawny, shivering kitten at her door."},
+{"w":"paucity","p":"n.","d":"small in quantity","e":"Gilbert lamented the paucity of twentieth century literature courses available at the college."},
+{"w":"pejorative","p":"adj.","d":"derogatory, uncomplimentary","e":"The evening's headline news covered an international scandal caused by a pejorative statement the senator had made."},
+{"w":"penchant","p":"n.","d":"a tendency, partiality, preference","e":"Jill's dinner parties quickly became monotonous on account of her penchant for Mexican dishes."},
+{"w":"penitent","p":"adj.","d":"remorseful, regretful","e":"The jury's verdict may have been more lenient if the criminal had appeared penitent for his gruesome crimes."},
+{"w":"penurious","p":"adj.","d":"miserly, stingy","e":"Stella complained that her husband's penurious ways made it impossible to live the lifestyle she felt she deserved."},
+{"w":"perfidious","p":"adj.","d":"disloyal, unfaithful","e":"After the official was caught selling government secrets to enemy agents, he was executed for his perfidious ways."},
+{"w":"perfunctory","p":"adj.","d":"showing little interest or enthusiasm","e":"The radio broadcaster announced the news of the massacre in a surprisingly perfunctory manner."},
+{"w":"permeate","p":"v.","d":"to spread throughout, saturate","e":"Mrs. Huxtable was annoyed that the wet dog's odor had permeated the furniture's upholstery."},
+{"w":"pernicious","p":"adj.","d":"extremely destructive or harmful","e":"The new government feared that the Communist sympathizers would have a pernicious influence on the nation's stability."},
+{"w":"perspicacity","p":"n.","d":"shrewdness, perceptiveness","e":"The detective was too humble to acknowledge that his perspicacity was the reason for his professional success."},
+{"w":"pertinacious","p":"adj.","d":"stubbornly persistent","e":"Harry's parents were frustrated with his pertinacious insistence that a monster lived in his closet."},
+{"w":"pervasive","p":"adj.","d":"having the tendency to spread throughout","e":"Stepping off the plane in Havana, I recognized the pervasive odor of sugar cane fields on fire."},
+{"w":"petulance","p":"n.","d":"rudeness, irritability","e":"The Nanny resigned after she could no longer tolerate the child's petulance."},
+{"w":"philanthropic","p":"adj.","d":"charitable, giving","e":"Many people felt that the billionaire's decision to donate her fortune to house the homeless was the ultimate philanthropic act."},
+{"w":"phlegmatic","p":"adj.","d":"uninterested, unresponsive","e":"Monique feared her dog was ill after the animal's phlegmatic response to his favorite chew toy."},
+{"w":"pillage","p":"v.","d":"to seize or plunder, especially in war","e":"Invading enemy soldiers pillaged the homes scattered along the country's border."},
+{"w":"pinnacle","p":"n.","d":"the highest point","e":"Book reviewers declared that the author's new novel was probably the pinnacle of Western literature."},
+{"w":"pithy","p":"adj.","d":"concisely meaningful","e":"My father's long-winded explanation was a stark contrast to his usually pithy statements."},
+{"w":"pittance","p":"n.","d":"a very small amount, especially relating to money","e":"Josh complained that he was paid a pittance for the great amount of work he did at the firm."},
+{"w":"placate","p":"v.","d":"to ease the anger of, soothe","e":"The man purchased a lollipop to placate his irritable son."},
+{"w":"placid","p":"adj.","d":"calm, peaceful","e":"The placid lake surface was as smooth as glass."},
+{"w":"platitude","p":"n.","d":"an uninspired remark, cliché","e":"After reading over her paper, Helene concluded that what she thought were profound insights were actually just platitudes."},
+{"w":"plaudits","p":"n.","d":"enthusiastic approval, applause","e":"The controversial new film received plaudits from even the harshest critics."},
+{"w":"plausible","p":"adj.","d":"believable, reasonable","e":"He studied all the data and then came up with a plausible theory."},
+{"w":"plenitude","p":"n.","d":"an abundance","e":"My grandmother was overwhelmed by the plenitude of tomatoes her garden yielded this season."},
+{"w":"plethora","p":"n.","d":"an abundance, excess","e":"The wedding banquet included a plethora of oysters piled almost three feet high."},
+{"w":"pliable","p":"adj.","d":"flexible","e":"Aircraft wings are designed to be somewhat pliable so they do not break in heavy turbulence."},
+{"w":"poignant","p":"adj.","d":"deeply affecting, moving","e":"My teacher actually cried after reading to us the poignant final chapter of the novel."},
+{"w":"polemic","p":"n.","d":"an aggressive argument against a specific opinion","e":"My brother launched into a polemic against my arguments that capitalism was an unjust economic system."},
+{"w":"portent","p":"n.","d":"an omen","e":"When a black cat crossed my sister's path, she took it as a portent that she would do badly on her spelling test."},
+{"w":"potable","p":"adj.","d":"suitable for drinking","e":"During sea voyages it is essential that ships carry a supply of potable water."},
+{"w":"pragmatic","p":"adj.","d":"practical","e":"The politician argued that increased security measures were a pragmatic necessity to ensure everyone's safety."},
+{"w":"precipice","p":"n.","d":"the face of a cliff, a steep or overhanging place","e":"The mountain climber hung from a precipice before finding a handhold and pulling himself up."},
+{"w":"preclude","p":"v.","d":"to prevent","e":"My grandfather's large and vicious guard dog precluded anyone from entering the yard."},
+{"w":"precocious","p":"adj.","d":"advanced, developing ahead of time","e":"Derek was so academically precocious that by the time he was 10 years old, he was already in the ninth grade."},
+{"w":"predilection","p":"n.","d":"a preference or inclination for something","e":"Francois has a predilection for eating scrambled eggs with ketchup."},
+{"w":"prescient","p":"adj.","d":"to have foreknowledge of events","e":"Questioning the fortune cookie's prediction, Ray went in search of the old hermit who was rumored to be prescient."},
+{"w":"presumptuous","p":"adj.","d":"disrespectfully bold","e":"The princess grew angry after the presumptuous noble tried to kiss her."},
+{"w":"pretense","p":"n.","d":"an appearance or action intended to deceive","e":"Nick borrowed his parents' car under the pretense of attending a group study session."},
+{"w":"primeval","p":"adj.","d":"original, ancient","e":"The first primates to walk on two legs were the primeval descendants of modern man."},
+{"w":"privation","p":"n.","d":"lacking basic necessities","e":"After decades of rule by an oppressive government, the recent drought only increased the people's privation."},
+{"w":"probity","p":"n.","d":"virtue, integrity","e":"Because he was never viewed as a man of great probity, no one was surprised by Mr. Samson's immoral behavior."},
+{"w":"proclivity","p":"n.","d":"a strong inclination toward something","e":"Harold's childhood proclivity for torturing small animals grew into a desire to become a surgeon."},
+{"w":"profane","p":"adj.","d":"lewd, indecent","e":"Jacob's profane act of dumping frogs in the holy water in the chapel resulted in his dismissal."},
+{"w":"profligate","p":"adj.","d":"dissolute, extravagant","e":"The profligate gambler loved to drink, spend money, steal, cheat, and hang out with prostitutes."},
+{"w":"profuse","p":"adj.","d":"plentiful, abundant","e":"The fans were profuse in their cheers for the star basketball player."},
+{"w":"propagate","p":"v.","d":"to multiply, spread out","e":"Rumors of Paul McCartney's demise propagated like wildfire throughout the world."},
+{"w":"propensity","p":"n.","d":"an inclination, preference","e":"Dermit has a propensity for dangerous activities such as bungee jumping."},
+{"w":"propitious","p":"adj.","d":"favorable","e":"The dark storm clouds suggested that the weather would not be propitious for sailing."},
+{"w":"propriety","p":"n.","d":"the quality or state of being proper, decent","e":"Erma's old-fashioned parents believed that her mini-skirt lacked the propriety expected of a 'nice' girl."},
+{"w":"prosaic","p":"adj.","d":"plain, lacking liveliness","e":"Heather's prosaic recital of the poem bored the audience."},
+{"w":"proscribe","p":"v.","d":"to condemn, outlaw","e":"The town council voted to proscribe the sale of alcohol on weekends."},
+{"w":"protean","p":"adj.","d":"able to change shape; displaying great variety","e":"Among Nigel's protean talents was his ability to touch the tip of his nose with his tongue."},
+{"w":"prowess","p":"n.","d":"extraordinary ability","e":"The musician had never taken a guitar lesson in his life, making his prowess with the instrument even more incredible."},
+{"w":"puerile","p":"adj.","d":"juvenile, immature","e":"The judge demanded order after the lawyer's puerile attempt to object by stomping his feet."},
+{"w":"pugnacious","p":"adj.","d":"quarrelsome, combative","e":"Aaron's pugnacious nature led him to start several barroom brawls each month."},
+{"w":"punctilious","p":"adj.","d":"eager to follow rules or conventions","e":"Punctilious Bobby, hall monitor extraordinaire, insisted that his peers follow the rules."},
+{"w":"pungent","p":"adj.","d":"having a pointed, sharp quality — often used to describe smells","e":"The pungent odor in the classroom made Joseph lose his concentration during the test."},
+{"w":"putrid","p":"adj.","d":"rotten, foul","e":"Those rotten eggs smell putrid."},
+{"w":"quagmire","p":"n.","d":"a difficult situation","e":"We'd all like to avoid the kind of military quagmire characterized by the Vietnam War."},
+{"w":"quandary","p":"n.","d":"a perplexed, unresolvable state","e":"Carlos found himself in a quandary: should he choose mint chocolate chip or cookie dough?"},
+{"w":"quell","p":"v.","d":"to control or diffuse a potentially explosive situation","e":"The skilled leader deftly quelled the rebellion."},
+{"w":"querulous","p":"adj.","d":"whiny, complaining","e":"If deprived of his pacifier, young Brendan becomes querulous."},
+{"w":"quixotic","p":"adj.","d":"idealistic, impractical","e":"Edward entertained a quixotic desire to fall in love at first sight in a laundromat."},
+{"w":"quotidian","p":"adj.","d":"daily","e":"Ambika's quotidian routines include drinking two cups of coffee in the morning."},
+{"w":"rail","p":"v.","d":"to scold, protest","e":"The professor railed against the injustice of the college's tenure policy."},
+{"w":"rancid","p":"adj.","d":"having a terrible taste or smell","e":"Rob was double-dog-dared to eat the rancid egg salad sandwich."},
+{"w":"rancor","p":"n.","d":"deep, bitter resentment","e":"When Eileen challenged me to a fight, I could see the rancor in her eyes."},
+{"w":"rapport","p":"n.","d":"mutual understanding and harmony","e":"When Margaret met her paramour, they felt an instant rapport."},
+{"w":"rash","p":"adj.","d":"hasty, incautious","e":"It's best to think things over calmly and thoroughly, rather than make rash decisions."},
+{"w":"raucous","p":"adj.","d":"loud, boisterous","e":"Sarah's neighbors called the cops when her house party got too raucous."},
+{"w":"raze","p":"v.","d":"to demolish, level","e":"The old tenement house was razed to make room for the large chain store."},
+{"w":"recalcitrant","p":"adj.","d":"defiant, unapologetic","e":"Even when scolded, the recalcitrant young girl simply stomped her foot and refused to finish her lima beans."},
+{"w":"reclusive","p":"adj.","d":"solitary, shunning society","e":"Reclusive authors such as J.D. Salinger do not relish media attention."},
+{"w":"rectitude","p":"n.","d":"uprightness, extreme morality","e":"The priest's rectitude gave him the moral authority to counsel his parishioners."},
+{"w":"redoubtable","p":"adj.","d":"formidable; commanding respect","e":"The fortress looked redoubtable set against a stormy sky."},
+{"w":"refute","p":"v.","d":"to prove wrong","e":"Maria refuted the president's argument as she yelled and gesticulated at the TV."},
+{"w":"relegate","p":"v.","d":"to assign to the proper or inferior place","e":"At the astrology conference, Simon was relegated to the Scorpio room."},
+{"w":"remedial","p":"adj.","d":"intended to repair gaps in students' basic knowledge","e":"After his teacher discovered he couldn't read, Alex was forced to enroll in remedial English."},
+{"w":"remiss","p":"adj.","d":"negligent, failing to take care","e":"The burglar gained entrance because the security guard, remiss in his duties, forgot to lock the door."},
+{"w":"repentant","p":"adj.","d":"penitent, sorry","e":"The repentant Dennis apologized profusely for breaking his mother's vase."},
+{"w":"replete","p":"adj.","d":"full, abundant","e":"The unedited version was replete with naughty words."},
+{"w":"reprehensible","p":"adj.","d":"deserving rebuke","e":"Jean's cruel and reprehensible attempt to dump her boyfriend on his birthday led to tears and recriminations."},
+{"w":"reproach","p":"v.","d":"to scold, disapprove","e":"Brian reproached the customer for failing to rewind the video he had rented."},
+{"w":"reprobate","p":"adj.","d":"evil, unprincipled","e":"The reprobate criminal sat sneering in the cell."},
+{"w":"repudiate","p":"v.","d":"to reject, refuse to accept","e":"Kwame made a strong case for an extension of his curfew, but his mother repudiated it with a few biting words."},
+{"w":"rescind","p":"v.","d":"to take back, repeal","e":"The company rescinded its offer of employment after discovering that Jane's resume was full of lies."},
+{"w":"resilient","p":"adj.","d":"able to recover from misfortune; able to withstand adversity","e":"The resilient ballplayer quickly recovered from his wrist injury."},
+{"w":"resolute","p":"adj.","d":"firm, determined","e":"With a resolute glint in her eye, Catherine announced that she was set on going to college in New York City."},
+{"w":"respite","p":"n.","d":"a break, rest","e":"Justin left the pub to gain a brief respite from the smoke and noise."},
+{"w":"restitution","p":"n.","d":"restoration to the rightful owner","e":"Many people feel that descendants of slaves should receive restitution for the sufferings of their ancestors."},
+{"w":"restive","p":"adj.","d":"resistant, stubborn, impatient","e":"The restive audience pelted the band with mud and yelled nasty comments."},
+{"w":"revere","p":"v.","d":"to esteem, show deference, venerate","e":"The doctor saved countless lives and became universally revered."},
+{"w":"rife","p":"adj.","d":"abundant","e":"Surprisingly, the famous novelist's writing was rife with spelling errors."},
+{"w":"ruminate","p":"v.","d":"to contemplate, reflect","e":"Terry liked to ruminate while sitting on the banks of the river, staring pensively into the water."},
+{"w":"ruse","p":"n.","d":"a trick","e":"Oliver concocted an elaborate ruse for sneaking out of the house to meet his girlfriend."},
+{"w":"saccharine","p":"adj.","d":"sickeningly sweet","e":"Tom's saccharine manner, although intended to make him popular, actually repelled his classmates."},
+{"w":"sacrosanct","p":"adj.","d":"holy, something that should not be criticized","e":"In the United States, the Constitution is often thought of as a sacrosanct document."},
+{"w":"sagacity","p":"n.","d":"shrewdness, soundness of perspective","e":"With remarkable sagacity, the wise old man predicted and thwarted his children's plan to ship him off to a nursing home."},
+{"w":"salient","p":"adj.","d":"significant, conspicuous","e":"One of the salient differences between Alison and Nancy is that Alison is a foot taller."},
+{"w":"sanctimonious","p":"adj.","d":"giving a hypocritical appearance of piety","e":"The sanctimonious Bertrand delivered stern lectures on the Ten Commandments to anyone who would listen, but thought nothing of stealing cars."},
+{"w":"sanguine","p":"adj.","d":"optimistic, cheery","e":"Polly reacted to any bad news with a sanguine smile and the chirpy cry, 'When life hands you lemons, make lemonade!'"},
+{"w":"satiate","p":"v.","d":"to satisfy excessively","e":"Satiated after eating far too much turkey and stuffing, Liza lay on the couch watching football."},
+{"w":"scathing","p":"adj.","d":"sharp, critical, hurtful","e":"Two hours after breaking up with Russell, Suzanne thought of the perfect scathing retort to his accusations."},
+{"w":"scintillating","p":"adj.","d":"sparkling","e":"The ice skater's scintillating rhinestone costume nearly blinded the judges."},
+{"w":"scrupulous","p":"adj.","d":"painstaking, careful","e":"With scrupulous care, Sam cut a snowflake out of white paper."},
+{"w":"scurrilous","p":"adj.","d":"vulgar, coarse","e":"When Bruno heard the scurrilous accusation being made about him, he could not believe it."},
+{"w":"sedentary","p":"adj.","d":"sitting, settled","e":"The sedentary cat did little but loll in the sun."},
+{"w":"seminal","p":"adj.","d":"original, important, creating a field","e":"Stephen Greenblatt's essays on Shakespeare proved to be seminal, initiating the critical school of New Historicism."},
+{"w":"serendipity","p":"n.","d":"luck, finding good things without looking for them","e":"In an amazing bit of serendipity, penniless Paula found a $20 bill in the subway station."},
+{"w":"servile","p":"adj.","d":"subservient","e":"The servile porter crept around the hotel lobby, bowing and quaking before the guests."},
+{"w":"sinuous","p":"adj.","d":"lithe, serpentine","e":"With the sinuous movements of her arms, the dancer mimicked the motion of a snake."},
+{"w":"solicitous","p":"adj.","d":"concerned, attentive","e":"Jim, laid up in bed with a nasty virus, enjoyed the solicitous attentions of his mother."},
+{"w":"somnolent","p":"adj.","d":"sleepy, drowsy","e":"The somnolent student kept falling asleep and waking up with a jerk."},
+{"w":"sophomoric","p":"adj.","d":"immature, uninformed","e":"The mature senior rolled her eyes at the sophomoric gross-out humor of the underclassman."},
+{"w":"speculative","p":"adj.","d":"not based in fact","e":"Sadly, Tessa was convicted on merely speculative evidence."},
+{"w":"spurious","p":"adj.","d":"false but designed to seem plausible","e":"Using a spurious argument, John convinced the others that he had won the board game on a technicality."},
+{"w":"stagnate","p":"v.","d":"to become or remain inactive, not develop, not flow","e":"With no room for advancement, the waiter's career stagnated."},
+{"w":"staid","p":"adj.","d":"sedate, serious, self-restrained","e":"The staid butler never changed his expression no matter what happened."},
+{"w":"stoic","p":"adj.","d":"unaffected by passion or feeling","e":"Penelope's faithfulness to Odysseus required that she be stoic and put off her many suitors."},
+{"w":"stolid","p":"adj.","d":"expressing little sensibility, unemotional","e":"Charles's stolid reaction to his wife's funeral differed from the passion he showed at the time of her death."},
+{"w":"strenuous","p":"adj.","d":"requiring tremendous energy or stamina","e":"Running a marathon is quite a strenuous task."},
+{"w":"strident","p":"adj.","d":"harsh, loud","e":"A strident man, Captain Von Trapp yelled at his daughter and made her cry."},
+{"w":"subjugate","p":"v.","d":"to bring under control, subdue","e":"The invading force captured and subjugated the natives of that place."},
+{"w":"sublime","p":"adj.","d":"lofty, grand, exalted","e":"The homeless man sadly pondered his former wealth and once sublime existence."},
+{"w":"succinct","p":"adj.","d":"marked by compact precision","e":"The governor's succinct speech energized the crowd while the mayor's rambled on and on."},
+{"w":"superfluous","p":"adj.","d":"exceeding what is necessary","e":"Tracy had already won the campaign so her constant flattery of others was superfluous."},
+{"w":"surfeit","p":"n.","d":"an overabundant supply or indulgence","e":"After partaking of the surfeit of tacos and tamales, Beth felt rather sick."},
+{"w":"surmise","p":"v.","d":"to infer with little evidence","e":"After speaking to only one of the students, the teacher was able to surmise what had caused the fight."},
+{"w":"surreptitious","p":"adj.","d":"stealthy","e":"The surreptitious CIA agents were able to get in and out of the house without anyone noticing."},
+{"w":"sycophant","p":"n.","d":"one who flatters for self-gain","e":"Some see the people in the cabinet as the president's closest advisors, but others see them as sycophants."},
+{"w":"tacit","p":"adj.","d":"expressed without words","e":"I interpreted my parents' refusal to talk as a tacit acceptance of my request."},
+{"w":"taciturn","p":"adj.","d":"not inclined to talk","e":"Though Jane never seems to stop talking, her brother is quite taciturn."},
+{"w":"tangential","p":"adj.","d":"incidental, peripheral, divergent","e":"I tried to discuss my salary, but the boss kept veering off into tangential topics."},
+{"w":"tantamount","p":"adj.","d":"equivalent in value or significance","e":"When it comes to sports, fearing your opponent is tantamount to losing."},
+{"w":"tedious","p":"adj.","d":"dull, boring","e":"As time passed and the history professor continued to drone on and on, the lecture became increasingly tedious."},
+{"w":"temerity","p":"n.","d":"audacity, recklessness","e":"Tom and Huck entered the scary cave armed with nothing but their own temerity."},
+{"w":"temperance","p":"n.","d":"moderation in action or thought","e":"Maintaining temperance will ensure that you are able to think rationally and objectively."},
+{"w":"tenable","p":"adj.","d":"able to be defended or maintained","e":"The department heads tore down the arguments in other people's theses, but Johari's work proved to be quite tenable."},
+{"w":"tenuous","p":"adj.","d":"having little substance or strength","e":"Your argument is very tenuous, since it relies so much on speculation and hearsay."},
+{"w":"timorous","p":"adj.","d":"timid, fearful","e":"When dealing with the unknown, timorous Tallulah almost always broke into tears."},
+{"w":"tirade","p":"n.","d":"a long speech marked by harsh or biting language","e":"Every time Jessica was late, her boyfriend went into a long tirade about punctuality."},
+{"w":"torpid","p":"adj.","d":"lethargic, dormant, lacking motion","e":"The torpid whale floated, wallowing in the water for hours."},
+{"w":"torrid","p":"adj.","d":"giving off intense heat, passionate","e":"I didn't want to witness the neighbor's torrid affair through the window."},
+{"w":"tortuous","p":"adj.","d":"winding","e":"The scary thing about driving in mountains are the narrow, tortuous roads."},
+{"w":"tractable","p":"adj.","d":"easily controlled","e":"The horse was so tractable, Myra didn't even need a bridle."},
+{"w":"transgress","p":"v.","d":"to violate, go over a limit","e":"The criminal's actions transgressed morality and human decency."},
+{"w":"transient","p":"adj.","d":"passing through briefly; passing into and out of existence","e":"Because virtually everyone in Palm Beach is a tourist, the population of the town is quite transient."},
+{"w":"transmute","p":"v.","d":"to change or alter in form","e":"Ancient alchemists believed that it was possible to transmute lead into gold."},
+{"w":"travesty","p":"n.","d":"a grossly inferior imitation","e":"According to the school newspaper's merciless theater critic, the school's rendition of Oklahoma was a travesty."},
+{"w":"tremulous","p":"adj.","d":"fearful","e":"I always feel a trifle tremulous when walking through a graveyard."},
+{"w":"trenchant","p":"adj.","d":"effective, articulate, clear-cut","e":"The directions that accompanied my new cell phone were trenchant and easy to follow."},
+{"w":"trepidation","p":"n.","d":"fear, apprehension","e":"Feeling great trepidation, Anya refused to jump into the pool because she thought she saw a shark in it."},
+{"w":"trite","p":"adj.","d":"not original, overused","e":"Keith thought of himself as very learned, but everyone else thought he was trite because his observations were always the same as David Letterman's."},
+{"w":"truculent","p":"adj.","d":"ready to fight, cruel","e":"This club doesn't really attract the dangerous types, so why was that bouncer being so truculent?"},
+{"w":"truncate","p":"v.","d":"to shorten by cutting off","e":"After winning the derby, the jockey truncated the long speech he had planned."},
+{"w":"turgid","p":"adj.","d":"swollen, excessively embellished in style or language","e":"The haughty writer did not realize how we all really felt about his turgid prose."},
+{"w":"turpitude","p":"n.","d":"depravity, moral corruption","e":"Sir Marcus's chivalry often contrasted with the turpitude he exhibited with the ladies at the tavern."},
+{"w":"ubiquitous","p":"adj.","d":"existing everywhere, widespread","e":"It seems that everyone in the United States has a television. The technology is ubiquitous here."},
+{"w":"umbrage","p":"n.","d":"resentment, offense","e":"He called me a lily-livered coward, and I took umbrage at the insult."},
+{"w":"uncanny","p":"adj.","d":"of supernatural character or origin","e":"Luka had an uncanny ability to know exactly what other people were thinking."},
+{"w":"unctuous","p":"adj.","d":"smooth or greasy in texture, appearance, manner","e":"The unctuous receptionist seemed untrustworthy, as if she was only being helpful because she thought we might give her a big tip."},
+{"w":"undulate","p":"v.","d":"to move in waves","e":"As the storm began to brew, the placid ocean began to undulate to an increasing degree."},
+{"w":"upbraid","p":"v.","d":"to criticize or scold severely","e":"The last thing Lindsay wanted was for Lisa to upbraid her again about missing the rent payment."},
+{"w":"usurp","p":"v.","d":"to seize by force, take possession of without right","e":"The rogue army general tried to usurp control of the government."},
+{"w":"utilitarian","p":"adj.","d":"relating to or aiming at usefulness","e":"The beautiful, fragile vase couldn't hold flowers or serve any other utilitarian purpose."},
+{"w":"utopia","p":"n.","d":"an imaginary and remote place of perfection","e":"Everyone in the world wants to live in a utopia, but no one can agree how to go about building one."},
+{"w":"vacillate","p":"v.","d":"to fluctuate, hesitate","e":"I prefer a definite answer, but my boss kept vacillating between the distinct options available to us."},
+{"w":"vacuous","p":"adj.","d":"lack of content or ideas, stupid","e":"Beyonce realized that the lyrics she had just penned were completely vacuous and tried to add more substance."},
+{"w":"vapid","p":"adj.","d":"lacking liveliness, dull","e":"The professor's comments about the poem were surprisingly vapid and dull."},
+{"w":"variegated","p":"adj.","d":"diversified, distinctly marked","e":"Each wire in the engineering exam was variegated by color so the students could figure out which one was which."},
+{"w":"vehemently","p":"adv.","d":"marked by intense force or emotion","e":"The candidate vehemently opposed cutting back on Social Security funding."},
+{"w":"venerable","p":"adj.","d":"deserving of respect because of age or achievement","e":"The venerable Supreme Court justice had made several key rulings in landmark cases throughout the years."},
+{"w":"venerate","p":"v.","d":"to regard with respect or to honor","e":"The tribute to John Lennon sought to venerate his music, his words, and his legend."},
+{"w":"veracity","p":"n.","d":"truthfulness, accuracy","e":"With several agencies regulating the reports, it was difficult to argue against its veracity."},
+{"w":"verbose","p":"adj.","d":"wordy, impaired by wordiness","e":"It took the verbose teacher two hours to explain the topic, while it should have taken only fifteen minutes."},
+{"w":"verdant","p":"adj.","d":"green in tint or color","e":"The verdant leaves on the trees made the world look emerald."},
+{"w":"vestige","p":"n.","d":"a mark or trace of something lost or vanished","e":"Do you know if the Mexican tortilla is a vestige of some form of Aztec corn-based flat bread?"},
+{"w":"vex","p":"v.","d":"to confuse or annoy","e":"My little brother vexes me by poking me in the ribs for hours on end."},
+{"w":"vilify","p":"v.","d":"to lower in importance, defame","e":"After the Watergate scandal, almost any story written about President Nixon sought to vilify him."},
+{"w":"vindicate","p":"v.","d":"to avenge; to free from allegation; to set free","e":"The attorney had no chance of vindicating the defendant with all the strong evidence presented by the state."},
+{"w":"vindictive","p":"adj.","d":"vengeful","e":"The vindictive madman seeks to exact vengeance for any insult that he perceives is directed at him."},
+{"w":"virtuoso","p":"n.","d":"one who excels in an art; a highly skilled musical performer","e":"Even though Lydia has studied piano for many years, she's only average at it. She's no virtuoso."},
+{"w":"viscous","p":"adj.","d":"not free flowing, syrupy","e":"The viscous syrup took three minutes to pour out of the bottle."},
+{"w":"vitriolic","p":"adj.","d":"having a caustic quality","e":"When angry, the woman would spew vitriolic insults."},
+{"w":"vituperate","p":"v.","d":"to berate","e":"Jack ran away as soon as his father found out, knowing he would be vituperated for his unseemly behavior."},
+{"w":"vivacious","p":"adj.","d":"lively, sprightly","e":"The vivacious clown makes all of the children laugh and giggle with his friendly antics."},
+{"w":"vociferous","p":"adj.","d":"loud, boisterous","e":"I'm tired of his vociferous whining so I'm breaking up with him."},
+{"w":"wallow","p":"v.","d":"to roll oneself indolently; to become or remain helpless","e":"My roommate can't get over her breakup with her boyfriend and now just wallows in self-pity."},
+{"w":"wane","p":"v.","d":"to decrease in size, dwindle","e":"Don't be so afraid of his wrath because his influence with the president is already beginning to wane."},
+{"w":"wanton","p":"adj.","d":"undisciplined, lewd, lustful","e":"Vicky's wanton demeanor often made the frat guys next door very excited."},
+{"w":"whimsical","p":"adj.","d":"fanciful, full of whims","e":"The whimsical little girl liked to pretend that she was an elvin princess."},
+{"w":"wily","p":"adj.","d":"crafty, sly","e":"Though they were not the strongest, wily Kit and Kat were definitely the most clever and full of tricks."},
+{"w":"winsome","p":"adj.","d":"charming, pleasing","e":"After such a long, frustrating day, I was grateful for Chris's winsome attitude and childish naivete."},
+{"w":"wistful","p":"adj.","d":"full of yearning; musingly sad","e":"Since her pet rabbit died, Edda missed it terribly and sat around wistful all day long."},
+{"w":"wizened","p":"adj.","d":"dry, shrunken, wrinkled","e":"Agatha's grandmother had the most wizened countenance, full of leathery wrinkles."},
+{"w":"wrath","p":"n.","d":"vengeful anger, punishment","e":"Did you really want to incur her wrath when she is known for inflicting the worst punishments legally possible?"},
+{"w":"yoke","p":"v.","d":"to join, link","e":"We yoked together the logs by tying a string around them."},
+{"w":"zealous","p":"adj.","d":"fervent, filled with eagerness in pursuit of something","e":"If he were any more zealous about getting his promotion, he'd practically live at the office."},
+{"w":"zenith","p":"n.","d":"the highest point, culminating point","e":"I was too nice to tell Nelly that she had reached the absolute zenith of her career with that one hit of hers."},
+{"w":"zephyr","p":"n.","d":"a gentle breeze","e":"If not for the zephyrs that were blowing and cooling us, our room would've been unbearably hot."}
+];
+
+// ─── STATE ───────────────────────────────────────────────────────
+const LETTERS = [...new Set(WORDS.map(w => w.w[0].toUpperCase()))].sort();
+let browseLetters = new Set(LETTERS);
+let fcLetters = new Set(LETTERS);
+let quizLetters = new Set(LETTERS);
+let fcMode = 'word';
+let fcDeck = [], fcIdx = 0, fcGot = 0;
+let qCount = 10, qType = 'word';
+let qDeck = [], qIdx = 0, qCorrect = 0, qAnswered = false;
+let missedWords = [];
+
+// ─── UTILITIES ───────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function wordsFor(set) { return WORDS.filter(w => set.has(w.w[0].toUpperCase())); }
+
+// ─── NAV ─────────────────────────────────────────────────────────
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'browse') renderBrowse();
+}
+
+// ─── LETTER BUTTONS ──────────────────────────────────────────────
+function buildLetterBtns(containerId, set, onChange) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  LETTERS.forEach(l => {
+    const b = document.createElement('button');
+    b.className = 'letter-btn' + (set.has(l) ? ' on' : '');
+    b.textContent = l;
+    b.onclick = () => {
+      if (set.has(l)) { set.delete(l); b.classList.remove('on'); }
+      else { set.add(l); b.classList.add('on'); }
+      onChange();
+    };
+    c.appendChild(b);
+  });
+}
+function selectAll(type) {
+  const s = type === 'fc' ? fcLetters : quizLetters;
+  const id = type === 'fc' ? 'fcLetters' : 'quizLetters';
+  LETTERS.forEach(l => s.add(l));
+  document.querySelectorAll(`#${id} .letter-btn`).forEach(b => b.classList.add('on'));
+  updateCount(type);
+}
+function clearAll(type) {
+  const s = type === 'fc' ? fcLetters : quizLetters;
+  const id = type === 'fc' ? 'fcLetters' : 'quizLetters';
+  s.clear();
+  document.querySelectorAll(`#${id} .letter-btn`).forEach(b => b.classList.remove('on'));
+  updateCount(type);
+}
+function updateCount(type) {
+  if (type === 'fc') document.getElementById('fcCount').textContent = wordsFor(fcLetters).length + ' words selected';
+  if (type === 'quiz') document.getElementById('quizWordCount').textContent = wordsFor(quizLetters).length + ' words in pool';
+}
+
+// ─── BROWSE ──────────────────────────────────────────────────────
+buildLetterBtns('browseLetters', browseLetters, renderBrowse);
+function renderBrowse() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const words = wordsFor(browseLetters).filter(w =>
+    !q || w.w.toLowerCase().includes(q) || w.d.toLowerCase().includes(q)
+  );
+  document.getElementById('browseMeta').textContent = words.length + ' words';
+  const list = document.getElementById('wordList');
+  if (!words.length) { list.innerHTML = '<div class="empty">No words found.</div>'; return; }
+  list.innerHTML = words.map(w => `
+    <div class="word-card">
+      <div class="wc-word">${w.w}</div>
+      <div class="wc-pos">${w.p}</div>
+      <div class="wc-def">${w.d}</div>
+      <div class="wc-ex">"${w.e}"</div>
+    </div>`).join('');
+}
+function filterBrowse() { renderBrowse(); }
+
+// ─── FLASHCARDS ──────────────────────────────────────────────────
+buildLetterBtns('fcLetters', fcLetters, () => updateCount('fc'));
+updateCount('fc');
+
+function setFCMode(m) {
+  fcMode = m;
+  document.getElementById('modeWord').classList.toggle('on', m === 'word');
+  document.getElementById('modeDef').classList.toggle('on', m === 'def');
+}
+function startFC() {
+  const words = wordsFor(fcLetters);
+  if (words.length < 2) { alert('Select at least one letter.'); return; }
+  fcDeck = shuffle(words);
+  fcIdx = 0; fcGot = 0;
+  document.getElementById('fcSetupView').style.display = 'none';
+  document.getElementById('fcGameView').style.display = 'block';
+  document.getElementById('fcDoneBox').style.display = 'none';
+  renderFCCard();
+}
+function renderFCCard() {
+  if (fcIdx >= fcDeck.length) { showFCDone(); return; }
+  const w = fcDeck[fcIdx];
+  const wrap = document.getElementById('fcCardWrap');
+  wrap.classList.remove('flipped');
+  const pct = Math.round((fcIdx / fcDeck.length) * 100);
+  document.getElementById('fcProgress').style.width = pct + '%';
+  document.getElementById('fcCounter').textContent = (fcIdx + 1) + ' / ' + fcDeck.length;
+  if (fcMode === 'word') {
+    document.getElementById('fcFront').innerHTML = `<div class="fc-word-big">${w.w}</div><div class="fc-pos-sm">${w.p}</div><div class="fc-hint">Click to reveal definition</div>`;
+    document.getElementById('fcBack').innerHTML = `<div class="fc-def-text">${w.d}</div><div class="fc-ex-text">"${w.e}"</div><div class="fc-hint">Click to flip back</div>`;
+  } else {
+    document.getElementById('fcFront').innerHTML = `<div class="fc-def-text">${w.d}</div><div class="fc-hint">Click to reveal word</div>`;
+    document.getElementById('fcBack').innerHTML = `<div class="fc-word-big">${w.w}</div><div class="fc-pos-sm">${w.p}</div><div class="fc-ex-text">"${w.e}"</div><div class="fc-hint">Click to flip back</div>`;
+  }
+}
+function flipFC() { document.getElementById('fcCardWrap').classList.toggle('flipped'); }
+function markFC(got) {
+  if (got) fcGot++;
+  fcIdx++;
+  renderFCCard();
+}
+function showFCDone() {
+  const box = document.getElementById('fcDoneBox');
+  box.style.display = 'block';
+  document.getElementById('fcDoneScore').textContent = fcGot + '/' + fcDeck.length;
+  document.getElementById('fcDoneLabel').textContent = 'You got ' + fcGot + ' out of ' + fcDeck.length + ' correct!';
+}
+function restartFC() {
+  fcDeck = shuffle(fcDeck);
+  fcIdx = 0; fcGot = 0;
+  document.getElementById('fcDoneBox').style.display = 'none';
+  renderFCCard();
+}
+function shuffleFC() {
+  const rem = fcDeck.slice(fcIdx);
+  fcDeck = fcDeck.slice(0, fcIdx).concat(shuffle(rem));
+  renderFCCard();
+}
+function backToFCSetup() {
+  document.getElementById('fcSetupView').style.display = 'block';
+  document.getElementById('fcGameView').style.display = 'none';
+}
+
+// ─── QUIZ ────────────────────────────────────────────────────────
+buildLetterBtns('quizLetters', quizLetters, () => updateCount('quiz'));
+updateCount('quiz');
+
+function setQCount(n, btn) {
+  qCount = n;
+  document.querySelectorAll('.qcount-btn').forEach(b => b.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+}
+function setQType(t) {
+  qType = t;
+  document.getElementById('qtWord').classList.toggle('on', t === 'word');
+  document.getElementById('qtDef').classList.toggle('on', t === 'def');
+}
+function startQuiz() {
+  const pool = wordsFor(quizLetters);
+  if (pool.length < 4) { alert('Select at least one letter (need 4+ words for choices).'); return; }
+  qDeck = shuffle(pool).slice(0, Math.min(qCount, pool.length));
+  qIdx = 0; qCorrect = 0; qAnswered = false; missedWords = [];
+  document.getElementById('quizSetupView').style.display = 'block';
+  document.getElementById('quizSetupView').style.display = 'none';
+  document.getElementById('quizGameView').style.display = 'block';
+  document.getElementById('quizResultView').style.display = 'none';
+  renderQuestion();
+}
+function renderQuestion() {
+  if (qIdx >= qDeck.length) { showResult(); return; }
+  const pct = Math.round((qIdx / qDeck.length) * 100);
+  document.getElementById('qBar').style.width = pct + '%';
+  document.getElementById('qProgressLabel').textContent = 'Question ' + (qIdx + 1) + ' of ' + qDeck.length;
+  document.getElementById('qScoreRunning').textContent = qCorrect + ' correct';
+  const correct = qDeck[qIdx];
+  const wrongs = shuffle(WORDS.filter(w => w.w !== correct.w)).slice(0, 3);
+  const choices = shuffle([correct, ...wrongs]);
+  qAnswered = false;
+  let promptHtml, labelFn;
+  if (qType === 'word') {
+    promptHtml = `<div class="q-prompt">${correct.w}</div><div class="q-sub">${correct.p}</div>`;
+    labelFn = w => w.d;
+  } else {
+    promptHtml = `<div class="q-prompt" style="font-size:1.05rem;font-weight:normal;">${correct.d}</div><div class="q-sub">Which word matches this definition?</div>`;
+    labelFn = w => w.w;
+  }
+  document.getElementById('qContent').innerHTML = `
+    ${promptHtml}
+    <div class="q-options">${choices.map(w => `
+      <button class="q-opt" onclick="answerQ('${w.w.replace(/'/g,"\\'")}','${correct.w.replace(/'/g,"\\'")}',this)">${labelFn(w)}</button>
+    `).join('')}</div>
+    <div class="q-feedback" id="qFeedback"></div>
+    <div class="q-next-wrap" id="qNextWrap" style="display:none;">
+      <button class="btn btn-primary" onclick="nextQ()">${qIdx + 1 < qDeck.length ? 'Next →' : 'See results'}</button>
+    </div>
+  `;
+}
+function answerQ(chosen, correct, btn) {
+  if (qAnswered) return;
+  qAnswered = true;
+  const isRight = chosen === correct;
+  if (isRight) { qCorrect++; btn.classList.add('correct'); }
+  else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.q-opt').forEach(b => {
+      const txt = b.textContent.trim();
+      const correctWord = WORDS.find(x => x.w === correct);
+      if (qType === 'word' && txt === correctWord?.d) b.classList.add('correct');
+      if (qType === 'def' && txt === correct) b.classList.add('correct');
+    });
+    missedWords.push(WORDS.find(x => x.w === correct));
+  }
+  document.querySelectorAll('.q-opt').forEach(b => b.disabled = true);
+  const fb = document.getElementById('qFeedback');
+  fb.style.color = isRight ? 'var(--accent)' : 'var(--danger)';
+  fb.textContent = isRight ? '✓ Correct!' : `✗ The answer was: ${qType === 'word' ? WORDS.find(x=>x.w===correct)?.d : correct}`;
+  document.getElementById('qNextWrap').style.display = 'block';
+}
+function nextQ() { qIdx++; renderQuestion(); }
+function showResult() {
+  document.getElementById('quizGameView').style.display = 'none';
+  document.getElementById('quizResultView').style.display = 'block';
+  const pct = Math.round((qCorrect / qDeck.length) * 100);
+  document.getElementById('rPct').textContent = pct + '%';
+  document.getElementById('rLabel').textContent = 'You got ' + qCorrect + ' out of ' + qDeck.length + ' correct';
+  document.getElementById('rCorrect').textContent = qCorrect + ' correct';
+  document.getElementById('rWrong').textContent = (qDeck.length - qCorrect) + ' wrong';
+  const mDiv = document.getElementById('rMissed');
+  if (missedWords.length) {
+    mDiv.innerHTML = `<div class="missed-title">Words to review (${missedWords.length})</div>
+      <div class="missed-grid">${missedWords.map(w => `
+        <div class="missed-item"><div class="missed-w">${w.w}</div><div class="missed-d">${w.d}</div></div>
+      `).join('')}</div>`;
+  } else { mDiv.innerHTML = ''; }
+}
+function backToQuizSetup() {
+  document.getElementById('quizSetupView').style.display = 'block';
+  document.getElementById('quizGameView').style.display = 'none';
+  document.getElementById('quizResultView').style.display = 'none';
+}
+
+// init
+renderBrowse();
+</script>
+</body>
+</html>
